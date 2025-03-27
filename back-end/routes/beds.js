@@ -19,6 +19,19 @@ router.get("/", auth, async (req, res) => {
     const availableBeds = totalBeds - occupiedBeds - maintenanceBeds;
     const occupancyRate = totalBeds > 0 ? (occupiedBeds / totalBeds) * 100 : 0;
     
+    // Calculate ward-specific counts
+    const generalBeds = beds.filter(bed => bed.wardType === 'general').length;
+    const icuBeds = beds.filter(bed => bed.wardType === 'icu').length;
+    
+    // Calculate available beds by type
+    const availableGeneralBeds = beds.filter(bed => 
+      bed.wardType === 'general' && !bed.isOccupied && !bed.isUnderMaintenance
+    ).length;
+    
+    const availableIcuBeds = beds.filter(bed => 
+      bed.wardType === 'icu' && !bed.isOccupied && !bed.isUnderMaintenance
+    ).length;
+    
     res.json({
       beds,
       stats: {
@@ -26,7 +39,11 @@ router.get("/", auth, async (req, res) => {
         occupiedBeds,
         availableBeds,
         maintenanceBeds,
-        occupancyRate: Math.round(occupancyRate)
+        occupancyRate: Math.round(occupancyRate),
+        generalBeds,
+        icuBeds,
+        availableGeneralBeds,
+        availableIcuBeds
       }
     });
   } catch (error) {

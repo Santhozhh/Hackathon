@@ -13,7 +13,11 @@ function BedDashboard() {
     maintenanceBeds: 0,
     occupancyRate: 0,
     availableRate: 0,
-    maintenanceRate: 0
+    maintenanceRate: 0,
+    generalBeds: 0,
+    icuBeds: 0,
+    availableGeneralBeds: 0,
+    availableIcuBeds: 0
   });
   const [loading, setLoading] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -72,6 +76,14 @@ function BedDashboard() {
       const availableRate = totalBeds > 0 ? (availableBeds / totalBeds) * 100 : 0;
       const maintenanceRate = totalBeds > 0 ? (maintenanceBeds / totalBeds) * 100 : 0;
       
+      // Separate general and ICU beds
+      const generalBeds = allBeds.filter(bed => bed.wardType === 'general').length;
+      const icuBeds = allBeds.filter(bed => bed.wardType === 'icu').length;
+      
+      // Separate available general and ICU beds
+      const availableGeneralBeds = allBeds.filter(bed => !bed.isOccupied && !bed.isUnderMaintenance && bed.wardType === 'general').length;
+      const availableIcuBeds = allBeds.filter(bed => !bed.isOccupied && !bed.isUnderMaintenance && bed.wardType === 'icu').length;
+      
       setStats({
         totalBeds,
         occupiedBeds,
@@ -79,7 +91,11 @@ function BedDashboard() {
         maintenanceBeds,
         occupancyRate: Math.round(occupancyRate),
         availableRate: Math.round(availableRate),
-        maintenanceRate: Math.round(maintenanceRate)
+        maintenanceRate: Math.round(maintenanceRate),
+        generalBeds,
+        icuBeds,
+        availableGeneralBeds,
+        availableIcuBeds
       });
     } catch (err) {
       console.error('Error fetching beds:', err);
@@ -503,28 +519,61 @@ function BedDashboard() {
       )}
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Total Beds</h3>
-          <p className="mt-2 text-3xl font-bold">{stats.totalBeds}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Total Beds */}
+        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+          <div className="text-4xl font-bold text-gray-800 mb-2">{stats.totalBeds}</div>
+          <div className="text-sm text-gray-500">Total Beds</div>
+          <div className="mt-2 text-xs text-gray-500">
+            <span className="text-blue-600 font-medium">{stats.generalBeds}</span> General / 
+            <span className="text-purple-600 font-medium"> {stats.icuBeds}</span> ICU
+          </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Occupied Beds</h3>
-          <p className="mt-2 text-3xl font-bold text-red-600">{stats.occupiedBeds}</p>
-          <p className="text-sm text-gray-500">({stats.occupancyRate}%)</p>
+        {/* Available Beds */}
+        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+          <div className="text-4xl font-bold text-green-600 mb-2">{stats.availableBeds}</div>
+          <div className="text-sm text-gray-500">Available Beds</div>
+          <div className="mt-2 text-xs text-gray-500">
+            <span className="text-blue-600 font-medium">{stats.availableGeneralBeds}</span> General / 
+            <span className="text-purple-600 font-medium"> {stats.availableIcuBeds}</span> ICU
+          </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Available Beds</h3>
-          <p className="mt-2 text-3xl font-bold text-green-600">{stats.availableBeds}</p>
-          <p className="text-sm text-gray-500">({stats.availableRate}%)</p>
+        {/* Occupied Beds */}
+        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+          <div className="text-4xl font-bold text-red-600 mb-2">{stats.occupiedBeds}</div>
+          <div className="text-sm text-gray-500">Occupied Beds</div>
+          <div className="mt-2 text-xs text-gray-500">
+            {Math.round(stats.occupancyRate)}% Occupancy Rate
+          </div>
+        </div>
+
+        {/* Maintenance Beds */}
+        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
+          <div className="text-4xl font-bold text-yellow-600 mb-2">{stats.maintenanceBeds}</div>
+          <div className="text-sm text-gray-500">Under Maintenance</div>
         </div>
         
+        {/* Bed Types Summary */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Maintenance</h3>
-          <p className="mt-2 text-3xl font-bold text-yellow-600">{stats.maintenanceBeds}</p>
-          <p className="text-sm text-gray-500">({stats.maintenanceRate}%)</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-3 text-center">Bed Types</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-blue-600 mr-2"></div>
+                <span className="text-sm">General Ward</span>
+              </div>
+              <span className="font-medium">{stats.generalBeds}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-purple-600 mr-2"></div>
+                <span className="text-sm">ICU</span>
+              </div>
+              <span className="font-medium">{stats.icuBeds}</span>
+            </div>
+          </div>
         </div>
       </div>
       
