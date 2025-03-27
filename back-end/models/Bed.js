@@ -26,6 +26,11 @@ const bedSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  wardType: {
+    type: String,
+    enum: ['general', 'icu'],
+    default: 'general'
+  }
 }, {
   timestamps: true,
 });

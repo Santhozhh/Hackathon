@@ -23,11 +23,13 @@ function BedDashboard() {
   // Form states
   const [addBedCount, setAddBedCount] = useState(1);
   const [patientName, setPatientName] = useState('');
+  const [wardType, setWardType] = useState('general');
   const [patientToDischarge, setPatientToDischarge] = useState('');
   const [bedToMaintain, setBedToMaintain] = useState('');
   const [bedToReturn, setBedToReturn] = useState('');
   const [bedToRemove, setBedToRemove] = useState('');
   const [bedsToRemoveCount, setBedsToRemoveCount] = useState(1);
+  const [bedWardType, setBedWardType] = useState('general');
   
   // Action states
   const [isAddingBeds, setIsAddingBeds] = useState(false);
@@ -123,9 +125,12 @@ function BedDashboard() {
     
     try {
       setIsAddingBeds(true);
-      console.log('Adding beds with role:', role);
+      console.log('Adding beds with role:', role, 'and ward type:', bedWardType);
       
-      await axios.post(`${API_URL}/beds`, { count: addBedCount }, {
+      await axios.post(`${API_URL}/beds`, { 
+        count: addBedCount,
+        wardType: bedWardType 
+      }, {
         headers: getAuthHeaders()
       });
       
@@ -298,7 +303,12 @@ function BedDashboard() {
     
     try {
       setIsAllocatingBed(true);
-      await axios.post(`${API_URL}/beds/allocate`, { patientName }, {
+      console.log('Allocating bed with ward type:', wardType);
+      
+      await axios.post(`${API_URL}/beds/allocate`, { 
+        patientName,
+        wardType 
+      }, {
         headers: getAuthHeaders()
       });
       
@@ -579,6 +589,20 @@ function BedDashboard() {
                 onChange={(e) => setAddBedCount(parseInt(e.target.value))}
               />
             </div>
+            <div className="mb-4">
+              <label htmlFor="bedWardType" className="block text-sm font-medium text-gray-700 mb-1">
+                Ward Type
+              </label>
+              <select
+                id="bedWardType"
+                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                value={bedWardType}
+                onChange={(e) => setBedWardType(e.target.value)}
+              >
+                <option value="general">General Ward</option>
+                <option value="icu">ICU</option>
+              </select>
+            </div>
             <button
               type="submit"
               disabled={isAddingBeds}
@@ -674,6 +698,20 @@ function BedDashboard() {
                 onChange={(e) => setPatientName(e.target.value)}
                 required
               />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="wardType" className="block text-sm font-medium text-gray-700 mb-1">
+                Ward Type
+              </label>
+              <select
+                id="wardType"
+                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                value={wardType}
+                onChange={(e) => setWardType(e.target.value)}
+              >
+                <option value="general">General Ward</option>
+                <option value="icu">ICU</option>
+              </select>
             </div>
             <button
               type="submit"
@@ -915,6 +953,16 @@ function BedDashboard() {
                   </div>
                 </div>
                 
+                <div className="absolute top-0 left-0">
+                  <div className={`px-2 py-1 m-1 text-xs font-bold ${
+                    bed.wardType === 'icu' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-blue-600 text-white'
+                  }`}>
+                    {bed.wardType === 'icu' ? 'ICU' : 'GEN'}
+                  </div>
+                </div>
+                
                 <div className="p-5">
                   <div className="text-center mb-3">
                     <span className="text-4xl font-bold">{bed.bedNumber}</span>
@@ -934,6 +982,12 @@ function BedDashboard() {
                             {bed.allocatedAt ? new Date(bed.allocatedAt).toLocaleString() : '-'}
                           </span>
                         </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs font-medium text-gray-500">Ward:</span>
+                          <span className="text-xs font-semibold">
+                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
+                          </span>
+                        </div>
                       </div>
                     ) : bed.isUnderMaintenance ? (
                       <div className="space-y-1">
@@ -943,10 +997,24 @@ function BedDashboard() {
                             {bed.maintenanceStartTime ? new Date(bed.maintenanceStartTime).toLocaleString() : '-'}
                           </span>
                         </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs font-medium text-gray-500">Ward:</span>
+                          <span className="text-xs font-semibold">
+                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
+                          </span>
+                        </div>
                       </div>
                     ) : (
-                      <div className="text-center py-1">
-                        <span className="text-sm text-green-600 font-medium">Ready for allocation</span>
+                      <div className="space-y-1">
+                        <div className="text-center py-1">
+                          <span className="text-sm text-green-600 font-medium">Ready for allocation</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs font-medium text-gray-500">Ward:</span>
+                          <span className="text-xs font-semibold">
+                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1025,6 +1093,12 @@ function BedDashboard() {
                           <span className="text-xs font-medium text-gray-500">Maintenance Since:</span>
                           <span className="text-xs">
                             {bed.maintenanceStartTime ? new Date(bed.maintenanceStartTime).toLocaleString() : '-'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs font-medium text-gray-500">Ward:</span>
+                          <span className="text-xs font-semibold">
+                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
                           </span>
                         </div>
                       </div>
