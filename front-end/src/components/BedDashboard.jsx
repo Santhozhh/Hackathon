@@ -1017,20 +1017,32 @@ function BedDashboard() {
                     <form onSubmit={handleDischargeBed}>
                       <div className="mb-3">
                         <label htmlFor="patientToDischarge" className="block text-sm font-medium text-rose-700 mb-1">
-                          Patient Name
+                          Select Patient to Discharge
                         </label>
-                        <input
-                          type="text"
+                        <select
                           id="patientToDischarge"
                           className="w-full rounded-md border-rose-300 shadow-sm p-2 border focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
                           value={patientToDischarge}
                           onChange={(e) => setPatientToDischarge(e.target.value)}
                           required
-                        />
+                        >
+                          <option value="">-- Select Patient --</option>
+                          {beds
+                            .filter(bed => bed.isOccupied && !bed.isUnderMaintenance)
+                            .map(bed => (
+                              <option key={bed._id} value={bed.patientName}>
+                                {bed.patientName} (Bed #{bed.bedNumber} - {bed.wardType === 'icu' ? 'ICU' : 'General'})
+                              </option>
+                            ))
+                          }
+                        </select>
+                        {beds.filter(bed => bed.isOccupied && !bed.isUnderMaintenance).length === 0 && (
+                          <p className="mt-1 text-xs text-rose-500">No occupied beds available for discharge</p>
+                        )}
                       </div>
                       <button
                         type="submit"
-                        disabled={isDischargingBed}
+                        disabled={isDischargingBed || !patientToDischarge}
                         className="w-full bg-gradient-to-r from-rose-600 to-rose-700 text-white py-2 px-4 rounded-md hover:from-rose-700 hover:to-rose-800 disabled:opacity-70 transition-all duration-200 shadow-md"
                       >
                         {isDischargingBed ? 'Discharging...' : 'Discharge Patient'}
@@ -1054,20 +1066,33 @@ function BedDashboard() {
                     <form onSubmit={handleMaintenanceBed}>
                       <div className="mb-3">
                         <label htmlFor="bedToMaintain" className="block text-sm font-medium text-amber-700 mb-1">
-                          Bed Number
+                          Select Bed for Maintenance
                         </label>
-                        <input
-                          type="number"
+                        <select
                           id="bedToMaintain"
                           className="w-full rounded-md border-amber-300 shadow-sm p-2 border focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
                           value={bedToMaintain}
                           onChange={(e) => setBedToMaintain(e.target.value)}
                           required
-                        />
+                        >
+                          <option value="">-- Select Bed --</option>
+                          {beds
+                            .filter(bed => !bed.isOccupied && !bed.isUnderMaintenance)
+                            .sort((a, b) => a.bedNumber - b.bedNumber)
+                            .map(bed => (
+                              <option key={bed._id} value={bed.bedNumber}>
+                                Bed #{bed.bedNumber} ({bed.wardType === 'icu' ? 'ICU' : 'General'})
+                              </option>
+                            ))
+                          }
+                        </select>
+                        {beds.filter(bed => !bed.isOccupied && !bed.isUnderMaintenance).length === 0 && (
+                          <p className="mt-1 text-xs text-amber-500">No beds available for maintenance</p>
+                        )}
                       </div>
                       <button
                         type="submit"
-                        disabled={isMaintenanceBed}
+                        disabled={isMaintenanceBed || !bedToMaintain}
                         className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-2 px-4 rounded-md hover:from-amber-700 hover:to-amber-800 disabled:opacity-70 transition-all duration-200 shadow-md"
                       >
                         {isMaintenanceBed ? 'Processing...' : 'Set for Maintenance'}
@@ -1081,20 +1106,33 @@ function BedDashboard() {
                     <form onSubmit={handleReturnBedFromMaintenance}>
                       <div className="mb-3">
                         <label htmlFor="bedToReturn" className="block text-sm font-medium text-blue-700 mb-1">
-                          Bed Number
+                          Select Bed to Return from Maintenance
                         </label>
-                        <input
-                          type="number"
+                        <select
                           id="bedToReturn"
                           className="w-full rounded-md border-blue-300 shadow-sm p-2 border focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                           value={bedToReturn}
                           onChange={(e) => setBedToReturn(e.target.value)}
                           required
-                        />
+                        >
+                          <option value="">-- Select Bed --</option>
+                          {beds
+                            .filter(bed => bed.isUnderMaintenance)
+                            .sort((a, b) => a.bedNumber - b.bedNumber)
+                            .map(bed => (
+                              <option key={bed._id} value={bed.bedNumber}>
+                                Bed #{bed.bedNumber} ({bed.wardType === 'icu' ? 'ICU' : 'General'})
+                              </option>
+                            ))
+                          }
+                        </select>
+                        {beds.filter(bed => bed.isUnderMaintenance).length === 0 && (
+                          <p className="mt-1 text-xs text-blue-500">No beds currently under maintenance</p>
+                        )}
                       </div>
                       <button
                         type="submit"
-                        disabled={isReturningBed}
+                        disabled={isReturningBed || !bedToReturn}
                         className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2 px-4 rounded-md hover:from-blue-700 hover:to-blue-800 disabled:opacity-70 transition-all duration-200 shadow-md"
                       >
                         {isReturningBed ? 'Processing...' : 'Return to Service'}
