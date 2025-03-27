@@ -20,6 +20,11 @@ const bedHistorySchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  wardType: {
+    type: String,
+    enum: ['general', 'icu'],
+    default: 'general'
   }
 }, {
   timestamps: true

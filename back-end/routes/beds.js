@@ -19,6 +19,19 @@ router.get("/", auth, async (req, res) => {
     const availableBeds = totalBeds - occupiedBeds - maintenanceBeds;
     const occupancyRate = totalBeds > 0 ? (occupiedBeds / totalBeds) * 100 : 0;
     
+    // Calculate ward-specific counts
+    const generalBeds = beds.filter(bed => bed.wardType === 'general').length;
+    const icuBeds = beds.filter(bed => bed.wardType === 'icu').length;
+    
+    // Calculate available beds by type
+    const availableGeneralBeds = beds.filter(bed => 
+      bed.wardType === 'general' && !bed.isOccupied && !bed.isUnderMaintenance
+    ).length;
+    
+    const availableIcuBeds = beds.filter(bed => 
+      bed.wardType === 'icu' && !bed.isOccupied && !bed.isUnderMaintenance
+    ).length;
+    
     res.json({
       beds,
       stats: {
@@ -26,7 +39,11 @@ router.get("/", auth, async (req, res) => {
         occupiedBeds,
         availableBeds,
         maintenanceBeds,
-        occupancyRate: Math.round(occupancyRate)
+        occupancyRate: Math.round(occupancyRate),
+        generalBeds,
+        icuBeds,
+        availableGeneralBeds,
+        availableIcuBeds
       }
     });
   } catch (error) {
@@ -38,7 +55,9 @@ router.get("/", auth, async (req, res) => {
 // Add new beds (for bed manager)
 router.post("/", auth, checkRole("bedManager"), async (req, res) => {
   try {
-    const { count } = req.body;
+    const { count, wardType = 'general' } = req.body;
+    
+    console.log("Adding beds with ward type:", wardType);
     
     if (!count || count <= 0) {
       return res.status(400).json({ message: "Please provide a valid bed count" });
@@ -55,7 +74,8 @@ router.post("/", auth, checkRole("bedManager"), async (req, res) => {
       newBeds.push({
         bedNumber: startNumber + i,
         isOccupied: false,
-        isUnderMaintenance: false
+        isUnderMaintenance: false,
+        wardType: wardType
       });
     }
     
@@ -64,7 +84,8 @@ router.post("/", auth, checkRole("bedManager"), async (req, res) => {
     res.status(201).json({ 
       message: `${count} new beds added successfully`,
       firstBedNumber: startNumber,
-      lastBedNumber: startNumber + count - 1
+      lastBedNumber: startNumber + count - 1,
+      wardType: wardType
     });
   } catch (error) {
     console.error("Error in POST /beds:", error);
@@ -151,20 +172,25 @@ router.get("/history", auth, async (req, res) => {
 // Allocate a bed to a patient (for bed manager)
 router.post("/allocate", auth, checkRole("bedManager"), async (req, res) => {
   try {
-    const { patientName } = req.body;
+    const { patientName, wardType = 'general' } = req.body;
+    
+    console.log("Allocating bed with patient name:", patientName, "and ward type:", wardType);
     
     if (!patientName) {
       return res.status(400).json({ message: "Please provide a patient name" });
     }
     
-    // Find first available bed that is not under maintenance
+    // Find first available bed that is not under maintenance and matches ward type
     const availableBed = await Bed.findOne({ 
       isOccupied: false,
-      isUnderMaintenance: false 
+      isUnderMaintenance: false,
+      wardType: wardType
     });
     
     if (!availableBed) {
-      return res.status(400).json({ message: "No beds available" });
+      return res.status(400).json({ 
+        message: `No ${wardType === 'icu' ? 'ICU' : 'general ward'} beds available` 
+      });
     }
     
     // Update bed status
@@ -179,11 +205,12 @@ router.post("/allocate", auth, checkRole("bedManager"), async (req, res) => {
       bedNumber: availableBed.bedNumber,
       patientName: patientName,
       allocatedAt: availableBed.allocatedAt,
-      isActive: true
+      isActive: true,
+      wardType: availableBed.wardType
     });
     
     res.json({
-      message: `Bed ${availableBed.bedNumber} allocated to ${patientName}`,
+      message: `${wardType === 'icu' ? 'ICU' : 'General ward'} bed ${availableBed.bedNumber} allocated to ${patientName}`,
       bed: availableBed
     });
   } catch (error) {
