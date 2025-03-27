@@ -503,11 +503,11 @@ function BedDashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Bed Manager Dashboard</h1>
+    <div className="px-4 py-6 bg-gray-100">
+      <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">Hospital Bed Manager Dashboard</h1>
       
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           {error}
           <button 
             className="float-right font-bold"
@@ -518,433 +518,578 @@ function BedDashboard() {
         </div>
       )}
       
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Total Beds */}
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-          <div className="text-4xl font-bold text-gray-800 mb-2">{stats.totalBeds}</div>
-          <div className="text-sm text-gray-500">Total Beds</div>
-          <div className="mt-2 text-xs text-gray-500">
-            <span className="text-blue-600 font-medium">{stats.generalBeds}</span> General / 
-            <span className="text-purple-600 font-medium"> {stats.icuBeds}</span> ICU
-          </div>
-        </div>
-        
-        {/* Available Beds */}
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-          <div className="text-4xl font-bold text-green-600 mb-2">{stats.availableBeds}</div>
-          <div className="text-sm text-gray-500">Available Beds</div>
-          <div className="mt-2 text-xs text-gray-500">
-            <span className="text-blue-600 font-medium">{stats.availableGeneralBeds}</span> General / 
-            <span className="text-purple-600 font-medium"> {stats.availableIcuBeds}</span> ICU
-          </div>
-        </div>
-        
-        {/* Occupied Beds */}
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-          <div className="text-4xl font-bold text-red-600 mb-2">{stats.occupiedBeds}</div>
-          <div className="text-sm text-gray-500">Occupied Beds</div>
-          <div className="mt-2 text-xs text-gray-500">
-            {Math.round(stats.occupancyRate)}% Occupancy Rate
-          </div>
-        </div>
-
-        {/* Maintenance Beds */}
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-          <div className="text-4xl font-bold text-yellow-600 mb-2">{stats.maintenanceBeds}</div>
-          <div className="text-sm text-gray-500">Under Maintenance</div>
-        </div>
-        
-        {/* Bed Types Summary */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-3 text-center">Bed Types</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-3 h-3 rounded-full bg-blue-600 mr-2"></div>
-                <span className="text-sm">General Ward</span>
-              </div>
-              <span className="font-medium">{stats.generalBeds}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center">
-                <div className="w-3 h-3 rounded-full bg-purple-600 mr-2"></div>
-                <span className="text-sm">ICU</span>
-              </div>
-              <span className="font-medium">{stats.icuBeds}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Rate Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Occupancy Rate</h3>
-          <div className="mt-2 relative pt-1">
-            <div className="overflow-hidden h-4 mb-4 text-xs flex rounded bg-gray-200">
-              <div 
-                style={{ width: `${stats.occupancyRate}%` }} 
-                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"
-              ></div>
-            </div>
-            <p className="text-xl font-bold">{stats.occupancyRate}%</p>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Available Rate</h3>
-          <div className="mt-2 relative pt-1">
-            <div className="overflow-hidden h-4 mb-4 text-xs flex rounded bg-gray-200">
-              <div 
-                style={{ width: `${stats.availableRate}%` }} 
-                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-500"
-              ></div>
-            </div>
-            <p className="text-xl font-bold">{stats.availableRate}%</p>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Maintenance Rate</h3>
-          <div className="mt-2 relative pt-1">
-            <div className="overflow-hidden h-4 mb-4 text-xs flex rounded bg-gray-200">
-              <div 
-                style={{ width: `${stats.maintenanceRate}%` }} 
-                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500"
-              ></div>
-            </div>
-            <p className="text-xl font-bold">{stats.maintenanceRate}%</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Action Forms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Add Beds Form */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Add Beds</h3>
-          <form onSubmit={handleAddBeds}>
-            <div className="mb-4">
-              <label htmlFor="bedCount" className="block text-sm font-medium text-gray-700 mb-1">
-                Number of Beds
-              </label>
-              <input
-                type="number"
-                id="bedCount"
-                min="1"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={addBedCount}
-                onChange={(e) => setAddBedCount(parseInt(e.target.value))}
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="bedWardType" className="block text-sm font-medium text-gray-700 mb-1">
-                Ward Type
-              </label>
-              <select
-                id="bedWardType"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={bedWardType}
-                onChange={(e) => setBedWardType(e.target.value)}
-              >
-                <option value="general">General Ward</option>
-                <option value="icu">ICU</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              disabled={isAddingBeds}
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-indigo-400"
-            >
-              {isAddingBeds ? 'Adding...' : 'Add Beds'}
-            </button>
-          </form>
-        </div>
-        
-        {/* Remove Beds Section */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Remove Beds</h3>
-          <div className="space-y-4">
-            {/* Remove Single Bed Form */}
-            <form onSubmit={handleRemoveBed}>
-              <div className="mb-4">
-                <label htmlFor="bedToRemove" className="block text-sm font-medium text-gray-700 mb-1">
-                  Bed Number to Remove
-                </label>
-                <input
-                  type="number"
-                  id="bedToRemove"
-                  min="1"
-                  className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                  value={bedToRemove}
-                  onChange={(e) => setBedToRemove(e.target.value)}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isRemovingBed}
-                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-red-400"
-              >
-                {isRemovingBed ? 'Removing...' : 'Remove Bed'}
-              </button>
-            </form>
-            
-            {/* Divider */}
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">OR</span>
-              </div>
-            </div>
-            
-            {/* Remove Multiple Beds Form */}
-            <form onSubmit={handleRemoveMultipleBeds}>
-              <div className="mb-4">
-                <label htmlFor="bedsToRemoveCount" className="block text-sm font-medium text-gray-700 mb-1">
-                  Number of Highest Numbered Beds to Remove
-                </label>
-                <input
-                  type="number"
-                  id="bedsToRemoveCount"
-                  min="1"
-                  className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                  value={bedsToRemoveCount}
-                  onChange={(e) => setBedsToRemoveCount(parseInt(e.target.value))}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isRemovingMultipleBeds}
-                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-red-400"
-              >
-                {isRemovingMultipleBeds ? 'Removing...' : `Remove ${bedsToRemoveCount} Highest-Numbered Beds`}
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-      
-      {/* Patient Management Forms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Allocate Bed Form */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Allocate Bed</h3>
-          <form onSubmit={handleAllocateBed}>
-            <div className="mb-4">
-              <label htmlFor="patientName" className="block text-sm font-medium text-gray-700 mb-1">
-                Patient Name
-              </label>
-              <input
-                type="text"
-                id="patientName"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={patientName}
-                onChange={(e) => setPatientName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="wardType" className="block text-sm font-medium text-gray-700 mb-1">
-                Ward Type
-              </label>
-              <select
-                id="wardType"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={wardType}
-                onChange={(e) => setWardType(e.target.value)}
-              >
-                <option value="general">General Ward</option>
-                <option value="icu">ICU</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              disabled={isAllocatingBed || stats.availableBeds === 0}
-              className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:bg-green-400"
-            >
-              {isAllocatingBed ? 'Allocating...' : 'Allocate Bed'}
-            </button>
-          </form>
-        </div>
-        
-        {/* Discharge Bed Form */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Discharge Patient</h3>
-          <form onSubmit={handleDischargeBed}>
-            <div className="mb-4">
-              <label htmlFor="patientToDischarge" className="block text-sm font-medium text-gray-700 mb-1">
-                Patient Name
-              </label>
-              <input
-                type="text"
-                id="patientToDischarge"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={patientToDischarge}
-                onChange={(e) => setPatientToDischarge(e.target.value)}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isDischargingBed}
-              className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-red-400"
-            >
-              {isDischargingBed ? 'Discharging...' : 'Discharge Patient'}
-            </button>
-          </form>
-        </div>
-      </div>
-      
-      {/* Maintenance Forms */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Set Bed for Maintenance */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Set Bed for Maintenance</h3>
-          <form onSubmit={handleMaintenanceBed}>
-            <div className="mb-4">
-              <label htmlFor="bedToMaintain" className="block text-sm font-medium text-gray-700 mb-1">
-                Bed Number
-              </label>
-              <input
-                type="number"
-                id="bedToMaintain"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={bedToMaintain}
-                onChange={(e) => setBedToMaintain(e.target.value)}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isMaintenanceBed}
-              className="w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 disabled:bg-yellow-400"
-            >
-              {isMaintenanceBed ? 'Processing...' : 'Set for Maintenance'}
-            </button>
-          </form>
-        </div>
-        
-        {/* Return Bed from Maintenance */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Return Bed from Maintenance</h3>
-          <form onSubmit={handleReturnBedFromMaintenance}>
-            <div className="mb-4">
-              <label htmlFor="bedToReturn" className="block text-sm font-medium text-gray-700 mb-1">
-                Bed Number
-              </label>
-              <input
-                type="number"
-                id="bedToReturn"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={bedToReturn}
-                onChange={(e) => setBedToReturn(e.target.value)}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isReturningBed}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-blue-400"
-            >
-              {isReturningBed ? 'Processing...' : 'Return to Service'}
-            </button>
-          </form>
-        </div>
-      </div>
-      
-      {/* Patient History Table - Replace with cards */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="p-6 border-b flex justify-between items-center">
-          <h3 className="text-lg font-medium text-gray-900">Patient History</h3>
+      {/* Dashboard Layout */}
+      <div className="grid grid-cols-1 gap-8">
+        {/* Section: Statistics & Analytics */}
+        <section className="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-500">
+          <h2 className="text-xl font-semibold mb-4 text-indigo-800 border-b pb-2">Hospital Bed Statistics</h2>
           
-          <div className="flex space-x-2">
-            <button 
-              className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
-              onClick={() => fetchBedHistory()}
-            >
-              Refresh
-            </button>
-          </div>
-        </div>
-        
-        {historyError && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 m-4 rounded">
-            {historyError}
-            <button 
-              className="float-right font-bold"
-              onClick={() => setHistoryError('')}
-            >
-              &times;
-            </button>
-          </div>
-        )}
-        
-        {historyLoading ? (
-          <div className="text-center my-8">Loading history...</div>
-        ) : (
-          <div className="p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {bedHistory.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-500">
-                  No patient history available
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {/* Total Beds */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-indigo-500 transition-transform hover:scale-105">
+              <div className="text-3xl font-bold text-indigo-800 mb-1">{stats.totalBeds}</div>
+              <div className="text-sm text-indigo-600 font-medium">Total Beds</div>
+              <div className="mt-1 text-xs text-indigo-500">
+                <span className="text-blue-600 font-bold">{stats.generalBeds}</span> General / 
+                <span className="text-purple-700 font-bold"> {stats.icuBeds}</span> ICU
+              </div>
+            </div>
+            
+            {/* Available Beds */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-emerald-500 transition-transform hover:scale-105">
+              <div className="text-3xl font-bold text-emerald-600 mb-1">{stats.availableBeds}</div>
+              <div className="text-sm text-emerald-700 font-medium">Available</div>
+              <div className="mt-1 text-xs text-emerald-600">
+                <span className="text-blue-600 font-bold">{stats.availableGeneralBeds}</span> General / 
+                <span className="text-purple-700 font-bold"> {stats.availableIcuBeds}</span> ICU
+              </div>
+            </div>
+            
+            {/* Occupied Beds */}
+            <div className="bg-gradient-to-br from-red-50 to-rose-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-rose-500 transition-transform hover:scale-105">
+              <div className="text-3xl font-bold text-rose-600 mb-1">{stats.occupiedBeds}</div>
+              <div className="text-sm text-rose-700 font-medium">Occupied</div>
+              <div className="mt-1 text-xs text-rose-500 font-medium">
+                {Math.round(stats.occupancyRate)}% Occupancy
+              </div>
+            </div>
+
+            {/* Maintenance Beds */}
+            <div className="bg-gradient-to-br from-amber-50 to-yellow-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-amber-500 transition-transform hover:scale-105">
+              <div className="text-3xl font-bold text-amber-600 mb-1">{stats.maintenanceBeds}</div>
+              <div className="text-sm text-amber-700 font-medium">Maintenance</div>
+            </div>
+            
+            {/* Bed Types Summary */}
+            <div className="bg-gradient-to-br from-purple-50 to-fuchsia-100 rounded-lg shadow-md p-4 border-b-4 border-purple-500 transition-transform hover:scale-105">
+              <h3 className="text-sm font-medium text-purple-800 mb-2 text-center">Bed Types</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-blue-600 mr-2"></div>
+                    <span className="text-xs text-blue-700 font-medium">General</span>
+                  </div>
+                  <span className="font-bold text-blue-700">{stats.generalBeds}</span>
                 </div>
-              ) : (
-                bedHistory.map((record) => (
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-purple-600 mr-2"></div>
+                    <span className="text-xs text-purple-700 font-medium">ICU</span>
+                  </div>
+                  <span className="font-bold text-purple-700">{stats.icuBeds}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Rate Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-red-500 transition-transform hover:scale-105">
+              <h3 className="text-sm font-medium text-gray-900 flex items-center">
+                <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                Occupancy Rate
+              </h3>
+              <div className="mt-2 relative pt-1">
+                <div className="overflow-hidden h-3 mb-2 text-xs flex rounded-full bg-red-100">
                   <div 
-                    key={record._id} 
-                    className={`overflow-hidden rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md ${
-                      record.isActive 
-                        ? 'bg-blue-50 border-blue-200' 
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
+                    style={{ width: `${stats.occupancyRate}%` }} 
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-red-500 to-rose-600 rounded-full"
+                  ></div>
+                </div>
+                <p className="text-lg font-bold text-red-600">{stats.occupancyRate}%</p>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500 transition-transform hover:scale-105">
+              <h3 className="text-sm font-medium text-gray-900 flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                Available Rate
+              </h3>
+              <div className="mt-2 relative pt-1">
+                <div className="overflow-hidden h-3 mb-2 text-xs flex rounded-full bg-green-100">
+                  <div 
+                    style={{ width: `${stats.availableRate}%` }} 
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"
+                  ></div>
+                </div>
+                <p className="text-lg font-bold text-green-600">{stats.availableRate}%</p>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500 transition-transform hover:scale-105">
+              <h3 className="text-sm font-medium text-gray-900 flex items-center">
+                <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                Maintenance Rate
+              </h3>
+              <div className="mt-2 relative pt-1">
+                <div className="overflow-hidden h-3 mb-2 text-xs flex rounded-full bg-yellow-100">
+                  <div 
+                    style={{ width: `${stats.maintenanceRate}%` }} 
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full"
+                  ></div>
+                </div>
+                <p className="text-lg font-bold text-yellow-600">{stats.maintenanceRate}%</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Section: Bed Management */}
+        <section className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+          <h2 className="text-xl font-semibold mb-4 text-blue-800 border-b pb-2">Bed Management</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Add Beds Form */}
+            <div className="bg-gradient-to-br from-white to-indigo-50 rounded-lg shadow-md p-4 border border-indigo-100">
+              <h3 className="text-md font-medium text-indigo-800 mb-3">Add Beds</h3>
+              <form onSubmit={handleAddBeds}>
+                <div className="mb-3">
+                  <label htmlFor="bedCount" className="block text-sm font-medium text-indigo-700 mb-1">
+                    Number of Beds
+                  </label>
+                  <input
+                    type="number"
+                    id="bedCount"
+                    min="1"
+                    className="w-full rounded-md border-indigo-300 shadow-sm p-2 border focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    value={addBedCount}
+                    onChange={(e) => setAddBedCount(parseInt(e.target.value))}
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="bedWardType" className="block text-sm font-medium text-indigo-700 mb-1">
+                    Ward Type
+                  </label>
+                  <select
+                    id="bedWardType"
+                    className="w-full rounded-md border-indigo-300 shadow-sm p-2 border focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    value={bedWardType}
+                    onChange={(e) => setBedWardType(e.target.value)}
                   >
-                    <div className="p-5">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <span className="text-lg font-bold">{record.bedNumber}</span>
-                          <div className="text-xs text-gray-500">Bed Number</div>
-                        </div>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          record.isActive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {record.isActive ? 'Current' : 'Discharged'}
+                    <option value="general">General Ward</option>
+                    <option value="icu">ICU</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isAddingBeds}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-2 px-4 rounded-md hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                >
+                  {isAddingBeds ? 'Adding...' : 'Add Beds'}
+                </button>
+              </form>
+            </div>
+            
+            {/* Remove Beds Section */}
+            <div className="bg-gradient-to-br from-white to-rose-50 rounded-lg shadow-md p-4 border border-rose-100">
+              <h3 className="text-md font-medium text-rose-800 mb-3">Remove Beds</h3>
+              <div className="space-y-4">
+                {/* Remove Single Bed Form */}
+                <form onSubmit={handleRemoveBed}>
+                  <div className="mb-3">
+                    <label htmlFor="bedToRemove" className="block text-sm font-medium text-rose-700 mb-1">
+                      Bed Number to Remove
+                    </label>
+                    <input
+                      type="number"
+                      id="bedToRemove"
+                      min="1"
+                      className="w-full rounded-md border-rose-300 shadow-sm p-2 border focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
+                      value={bedToRemove}
+                      onChange={(e) => setBedToRemove(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isRemovingBed}
+                    className="w-full bg-gradient-to-r from-rose-600 to-rose-700 text-white py-2 px-4 rounded-md hover:from-rose-700 hover:to-rose-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                  >
+                    {isRemovingBed ? 'Removing...' : 'Remove Bed'}
+                  </button>
+                </form>
+                
+                {/* Divider */}
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-rose-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-3 bg-gradient-to-r from-rose-50 to-white text-rose-500 font-medium">OR</span>
+                  </div>
+                </div>
+                
+                {/* Remove Multiple Beds Form */}
+                <form onSubmit={handleRemoveMultipleBeds}>
+                  <div className="mb-3">
+                    <label htmlFor="bedsToRemoveCount" className="block text-sm font-medium text-rose-700 mb-1">
+                      Number of Highest Numbered Beds to Remove
+                    </label>
+                    <input
+                      type="number"
+                      id="bedsToRemoveCount"
+                      min="1"
+                      className="w-full rounded-md border-rose-300 shadow-sm p-2 border focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
+                      value={bedsToRemoveCount}
+                      onChange={(e) => setBedsToRemoveCount(parseInt(e.target.value))}
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isRemovingMultipleBeds}
+                    className="w-full bg-gradient-to-r from-rose-600 to-rose-700 text-white py-2 px-4 rounded-md hover:from-rose-700 hover:to-rose-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                  >
+                    {isRemovingMultipleBeds ? 'Removing...' : `Remove ${bedsToRemoveCount} Highest-Numbered Beds`}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Section: Patient Allocation */}
+        <section className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
+          <h2 className="text-xl font-semibold mb-4 text-green-800 border-b pb-2">Patient Allocation</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Allocate Bed Form */}
+            <div className="bg-gradient-to-br from-white to-emerald-50 rounded-lg shadow-md p-4 border border-emerald-100">
+              <h3 className="text-md font-medium text-emerald-800 mb-3">Allocate Bed</h3>
+              <form onSubmit={handleAllocateBed}>
+                <div className="mb-3">
+                  <label htmlFor="patientName" className="block text-sm font-medium text-emerald-700 mb-1">
+                    Patient Name
+                  </label>
+                  <input
+                    type="text"
+                    id="patientName"
+                    className="w-full rounded-md border-emerald-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                    value={patientName}
+                    onChange={(e) => setPatientName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="wardType" className="block text-sm font-medium text-emerald-700 mb-1">
+                    Ward Type
+                  </label>
+                  <select
+                    id="wardType"
+                    className="w-full rounded-md border-emerald-300 shadow-sm p-2 border focus:border-emerald-500 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                    value={wardType}
+                    onChange={(e) => setWardType(e.target.value)}
+                  >
+                    <option value="general">General Ward</option>
+                    <option value="icu">ICU</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={isAllocatingBed || stats.availableBeds === 0}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-2 px-4 rounded-md hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                >
+                  {isAllocatingBed ? 'Allocating...' : 'Allocate Bed'}
+                </button>
+              </form>
+            </div>
+            
+            {/* Discharge Bed Form */}
+            <div className="bg-gradient-to-br from-white to-rose-50 rounded-lg shadow-md p-4 border border-rose-100">
+              <h3 className="text-md font-medium text-rose-800 mb-3">Discharge Patient</h3>
+              <form onSubmit={handleDischargeBed}>
+                <div className="mb-3">
+                  <label htmlFor="patientToDischarge" className="block text-sm font-medium text-rose-700 mb-1">
+                    Patient Name
+                  </label>
+                  <input
+                    type="text"
+                    id="patientToDischarge"
+                    className="w-full rounded-md border-rose-300 shadow-sm p-2 border focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50"
+                    value={patientToDischarge}
+                    onChange={(e) => setPatientToDischarge(e.target.value)}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isDischargingBed}
+                  className="w-full bg-gradient-to-r from-rose-600 to-rose-700 text-white py-2 px-4 rounded-md hover:from-rose-700 hover:to-rose-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                >
+                  {isDischargingBed ? 'Discharging...' : 'Discharge Patient'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+        
+        {/* Section: Maintenance Management */}
+        <section className="bg-white rounded-xl shadow-md p-6 border-l-4 border-amber-500">
+          <h2 className="text-xl font-semibold mb-4 text-amber-800 border-b pb-2">Maintenance Management</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Set Bed for Maintenance */}
+            <div className="bg-gradient-to-br from-white to-amber-50 rounded-lg shadow-md p-4 border border-amber-100">
+              <h3 className="text-md font-medium text-amber-800 mb-3">Set Bed for Maintenance</h3>
+              <form onSubmit={handleMaintenanceBed}>
+                <div className="mb-3">
+                  <label htmlFor="bedToMaintain" className="block text-sm font-medium text-amber-700 mb-1">
+                    Bed Number
+                  </label>
+                  <input
+                    type="number"
+                    id="bedToMaintain"
+                    className="w-full rounded-md border-amber-300 shadow-sm p-2 border focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50"
+                    value={bedToMaintain}
+                    onChange={(e) => setBedToMaintain(e.target.value)}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isMaintenanceBed}
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white py-2 px-4 rounded-md hover:from-amber-700 hover:to-amber-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                >
+                  {isMaintenanceBed ? 'Processing...' : 'Set for Maintenance'}
+                </button>
+              </form>
+            </div>
+            
+            {/* Return Bed from Maintenance */}
+            <div className="bg-gradient-to-br from-white to-blue-50 rounded-lg shadow-md p-4 border border-blue-100">
+              <h3 className="text-md font-medium text-blue-800 mb-3">Return Bed from Maintenance</h3>
+              <form onSubmit={handleReturnBedFromMaintenance}>
+                <div className="mb-3">
+                  <label htmlFor="bedToReturn" className="block text-sm font-medium text-blue-700 mb-1">
+                    Bed Number
+                  </label>
+                  <input
+                    type="number"
+                    id="bedToReturn"
+                    className="w-full rounded-md border-blue-300 shadow-sm p-2 border focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    value={bedToReturn}
+                    onChange={(e) => setBedToReturn(e.target.value)}
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isReturningBed}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2 px-4 rounded-md hover:from-blue-700 hover:to-blue-800 disabled:opacity-70 transition-all duration-200 shadow-md"
+                >
+                  {isReturningBed ? 'Processing...' : 'Return to Service'}
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          {/* Maintenance Beds List */}
+          <div className="mt-4 bg-white shadow-md rounded-lg overflow-hidden border border-amber-100">
+            <div className="bg-gradient-to-r from-amber-500 to-yellow-600 p-3 border-b flex justify-between items-center">
+              <h3 className="text-md font-medium text-white">Current Maintenance Beds</h3>
+              <button 
+                className="px-2 py-1 text-xs bg-white text-amber-700 font-medium rounded-md hover:bg-amber-50 transition-colors duration-200 shadow-sm"
+                onClick={() => fetchBeds()}
+              >
+                Refresh
+              </button>
+            </div>
+            
+            <div className="p-3 bg-gradient-to-b from-white to-amber-50 max-h-60 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {beds.filter(bed => bed.isUnderMaintenance).length === 0 ? (
+                  <div className="col-span-full text-center py-4 text-gray-500 text-sm">
+                    No beds currently under maintenance
+                  </div>
+                ) : (
+                  beds.filter(bed => bed.isUnderMaintenance).map((bed) => (
+                    <div 
+                      key={bed._id} 
+                      className="relative overflow-hidden rounded-lg border border-yellow-200 bg-gradient-to-br from-yellow-50 to-amber-100 shadow-sm transition-all hover:shadow-md p-2"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-bold">{bed.bedNumber}</span>
+                        <span className="text-xs font-medium px-1.5 py-0.5 bg-amber-200 text-amber-800 rounded">
+                          {bed.wardType === 'icu' ? 'ICU' : 'GEN'}
                         </span>
                       </div>
                       
-                      <div className="mt-3 space-y-2">
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Patient:</div>
-                          <div className="text-sm font-semibold">{record.patientName}</div>
+                      <div className="text-xs mt-1 text-gray-600">
+                        Since: {bed.maintenanceStartTime ? new Date(bed.maintenanceStartTime).toLocaleString() : '-'}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Section: History & Records */}
+        <section className="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+          <h2 className="text-xl font-semibold mb-4 text-purple-800 border-b pb-2">Patient History</h2>
+          
+          <div className="bg-white shadow-md rounded-lg overflow-hidden border border-purple-100">
+            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 border-b flex justify-between items-center">
+              <h3 className="text-md font-medium text-white">Recent Allocations</h3>
+              <button 
+                className="px-2 py-1 text-xs bg-white text-indigo-700 font-medium rounded-md hover:bg-indigo-50 transition-colors duration-200 shadow-sm"
+                onClick={() => fetchBedHistory()}
+              >
+                Refresh
+              </button>
+            </div>
+            
+            {historyError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 m-2 rounded text-xs">
+                {historyError}
+                <button 
+                  className="float-right font-bold"
+                  onClick={() => setHistoryError('')}
+                >
+                  &times;
+                </button>
+              </div>
+            )}
+            
+            {historyLoading ? (
+              <div className="text-center py-4 text-sm">Loading history...</div>
+            ) : (
+              <div className="p-3 bg-gradient-to-b from-white to-purple-50 max-h-80 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                  {bedHistory.length === 0 ? (
+                    <div className="col-span-full text-center py-4 text-gray-500 text-sm">
+                      No patient history available
+                    </div>
+                  ) : (
+                    bedHistory.map((record) => (
+                      <div 
+                        key={record._id} 
+                        className={`overflow-hidden rounded-lg border shadow-sm transition-all hover:shadow-md p-2 ${
+                          record.isActive 
+                            ? 'bg-gradient-to-br from-blue-50 to-indigo-100 border-blue-200' 
+                            : 'bg-gradient-to-br from-gray-50 to-slate-100 border-gray-200'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex gap-1 items-center">
+                            <span className="text-md font-bold">#{record.bedNumber}</span>
+                            <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
+                              record.isActive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'
+                            }`}>
+                              {record.isActive ? 'Current' : 'Past'}
+                            </span>
+                          </div>
+                          <span className="text-xs font-medium px-1.5 py-0.5 bg-purple-100 text-purple-800 rounded">
+                            {record.wardType === 'icu' ? 'ICU' : 'GEN'}
+                          </span>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="text-sm font-semibold mt-1">{record.patientName}</div>
+                        
+                        <div className="mt-1 grid grid-cols-2 gap-1 text-xs">
                           <div>
-                            <div className="text-xs font-medium text-gray-500">Allocated:</div>
-                            <div className="text-xs">
-                              {new Date(record.allocatedAt).toLocaleDateString()}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {new Date(record.allocatedAt).toLocaleTimeString()}
-                            </div>
+                            <span className="text-gray-500">In:</span> {new Date(record.allocatedAt).toLocaleDateString()}
                           </div>
                           
                           {record.dischargedAt && (
                             <div>
-                              <div className="text-xs font-medium text-gray-500">Discharged:</div>
-                              <div className="text-xs">
-                                {new Date(record.dischargedAt).toLocaleDateString()}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(record.dischargedAt).toLocaleTimeString()}
-                              </div>
+                              <span className="text-gray-500">Out:</span> {new Date(record.dischargedAt).toLocaleDateString()}
                             </div>
                           )}
                         </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+        
+        {/* Section: All Beds */}
+        <section className="bg-white rounded-xl shadow-md p-6 border-l-4 border-indigo-500">
+          <h2 className="text-xl font-semibold mb-4 text-indigo-800 border-b pb-2 flex justify-between items-center">
+            <span>All Hospital Beds</span>
+            <button 
+              className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 font-medium rounded-md hover:bg-indigo-200 transition-colors duration-200"
+              onClick={() => fetchBeds()}
+            >
+              Refresh Beds
+            </button>
+          </h2>
+          
+          {/* Card-based bed list */}
+          <div className="p-2 bg-gradient-to-b from-white to-blue-50 rounded-md">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {beds.length === 0 ? (
+                <div className="col-span-full text-center py-6 text-gray-500">
+                  No beds available. Please add beds to get started.
+                </div>
+              ) : (
+                beds.map((bed) => (
+                  <div 
+                    key={bed._id} 
+                    className={`relative overflow-hidden rounded-lg border shadow-sm transition-transform hover:scale-105 ${
+                      bed.isUnderMaintenance 
+                        ? 'bg-gradient-to-br from-yellow-50 to-amber-100 border-yellow-200' 
+                        : bed.isOccupied 
+                          ? 'bg-gradient-to-br from-red-50 to-rose-100 border-red-200' 
+                          : 'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200'
+                    }`}
+                  >
+                    <div className="absolute top-0 right-0">
+                      <div 
+                        className={`text-white px-2 py-0.5 m-1 text-xs font-bold rounded-sm ${
+                          bed.isUnderMaintenance 
+                            ? 'bg-gradient-to-r from-yellow-500 to-amber-600' 
+                            : bed.isOccupied 
+                              ? 'bg-gradient-to-r from-red-500 to-rose-600' 
+                              : 'bg-gradient-to-r from-green-500 to-emerald-600'
+                        }`}
+                      >
+                        {bed.isUnderMaintenance 
+                          ? 'MAINT' 
+                          : bed.isOccupied 
+                            ? 'OCCUP' 
+                            : 'AVAIL'}
+                      </div>
+                    </div>
+                    
+                    <div className="absolute top-0 left-0">
+                      <div className={`px-1.5 py-0.5 m-1 text-xs font-bold rounded-sm ${
+                        bed.wardType === 'icu' 
+                          ? 'bg-gradient-to-r from-purple-600 to-fuchsia-700 text-white' 
+                          : 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white'
+                      }`}>
+                        {bed.wardType === 'icu' ? 'ICU' : 'GEN'}
+                      </div>
+                    </div>
+                    
+                    <div className="p-2 pt-6">
+                      <div className="text-center mb-1">
+                        <span className="text-2xl font-bold">{bed.bedNumber}</span>
+                      </div>
+                      
+                      <div className="border-t border-gray-200 pt-1 mt-1 text-xs">
+                        {bed.isOccupied ? (
+                          <div>
+                            <div className="font-semibold text-center truncate" title={bed.patientName}>
+                              {bed.patientName}
+                            </div>
+                            <div className="text-gray-500 text-center text-xs">
+                              Since: {bed.allocatedAt ? new Date(bed.allocatedAt).toLocaleDateString() : '-'}
+                            </div>
+                          </div>
+                        ) : bed.isUnderMaintenance ? (
+                          <div className="text-center text-amber-600 font-medium">
+                            Under Maintenance
+                          </div>
+                        ) : (
+                          <div className="text-center text-green-600 font-medium">
+                            Available
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -952,216 +1097,7 @@ function BedDashboard() {
               )}
             </div>
           </div>
-        )}
-      </div>
-      
-      {/* Beds Table with Maintenance Filter */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="p-6 border-b flex justify-between items-center">
-          <h3 className="text-lg font-medium text-gray-900">Bed List</h3>
-          
-          <div className="flex space-x-2">
-            <button 
-              className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
-              onClick={() => fetchBeds()}
-            >
-              Refresh
-            </button>
-          </div>
-        </div>
-        
-        {/* Card-based bed list */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {beds.map((bed) => (
-              <div 
-                key={bed._id} 
-                className={`relative overflow-hidden rounded-lg border shadow-sm transition-all duration-200 hover:shadow-md ${
-                  bed.isUnderMaintenance 
-                    ? 'bg-yellow-50 border-yellow-200' 
-                    : bed.isOccupied 
-                      ? 'bg-red-50 border-red-200' 
-                      : 'bg-green-50 border-green-200'
-                }`}
-              >
-                <div className="absolute top-0 right-0">
-                  <div 
-                    className={`text-white px-4 py-1 m-1 text-xs font-bold ${
-                      bed.isUnderMaintenance 
-                        ? 'bg-yellow-500' 
-                        : bed.isOccupied 
-                          ? 'bg-red-500' 
-                          : 'bg-green-500'
-                    }`}
-                  >
-                    {bed.isUnderMaintenance 
-                      ? 'MAINTENANCE' 
-                      : bed.isOccupied 
-                        ? 'OCCUPIED' 
-                        : 'AVAILABLE'}
-                  </div>
-                </div>
-                
-                <div className="absolute top-0 left-0">
-                  <div className={`px-2 py-1 m-1 text-xs font-bold ${
-                    bed.wardType === 'icu' 
-                      ? 'bg-purple-600 text-white' 
-                      : 'bg-blue-600 text-white'
-                  }`}>
-                    {bed.wardType === 'icu' ? 'ICU' : 'GEN'}
-                  </div>
-                </div>
-                
-                <div className="p-5">
-                  <div className="text-center mb-3">
-                    <span className="text-4xl font-bold">{bed.bedNumber}</span>
-                    <div className="text-xs mt-1 text-gray-500">Bed Number</div>
-                  </div>
-                  
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    {bed.isOccupied ? (
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Patient:</span>
-                          <span className="text-sm font-semibold">{bed.patientName}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Since:</span>
-                          <span className="text-xs">
-                            {bed.allocatedAt ? new Date(bed.allocatedAt).toLocaleString() : '-'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Ward:</span>
-                          <span className="text-xs font-semibold">
-                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
-                          </span>
-                        </div>
-                      </div>
-                    ) : bed.isUnderMaintenance ? (
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Maintenance Since:</span>
-                          <span className="text-xs">
-                            {bed.maintenanceStartTime ? new Date(bed.maintenanceStartTime).toLocaleString() : '-'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Ward:</span>
-                          <span className="text-xs font-semibold">
-                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="text-center py-1">
-                          <span className="text-sm text-green-600 font-medium">Ready for allocation</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Ward:</span>
-                          <span className="text-xs font-semibold">
-                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div 
-                  className={`px-4 py-2 text-xs font-medium text-center text-white ${
-                    bed.isUnderMaintenance 
-                      ? 'bg-yellow-500' 
-                      : bed.isOccupied 
-                        ? 'bg-red-500' 
-                        : 'bg-green-500'
-                  }`}
-                >
-                  {bed.isUnderMaintenance 
-                    ? 'Under Maintenance' 
-                    : bed.isOccupied 
-                      ? `Occupied by ${bed.patientName}` 
-                      : 'Available for Patients'}
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Show message if no beds */}
-          {beds.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No beds available. Please add beds to get started.
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {/* Maintenance Beds Table - Replace with cards */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="p-6 border-b flex justify-between items-center">
-          <h3 className="text-lg font-medium text-gray-900">Beds Under Maintenance</h3>
-          
-          <div className="flex space-x-2">
-            <button 
-              className="px-3 py-1 text-sm border rounded-md hover:bg-gray-50"
-              onClick={() => fetchBeds()}
-            >
-              Refresh
-            </button>
-          </div>
-        </div>
-        
-        <div className="p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {beds.filter(bed => bed.isUnderMaintenance).length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                No beds currently under maintenance
-              </div>
-            ) : (
-              beds.filter(bed => bed.isUnderMaintenance).map((bed) => (
-                <div 
-                  key={bed._id} 
-                  className="relative overflow-hidden rounded-lg border border-yellow-200 bg-yellow-50 shadow-sm transition-all duration-200 hover:shadow-md"
-                >
-                  <div className="absolute top-0 right-0">
-                    <div className="bg-yellow-500 text-white px-4 py-1 m-1 text-xs font-bold">
-                      MAINTENANCE
-                    </div>
-                  </div>
-                  
-                  <div className="p-5">
-                    <div className="text-center mb-3">
-                      <span className="text-4xl font-bold">{bed.bedNumber}</span>
-                      <div className="text-xs mt-1 text-gray-500">Bed Number</div>
-                    </div>
-                    
-                    <div className="mt-4 pt-3 border-t border-gray-200">
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Maintenance Since:</span>
-                          <span className="text-xs">
-                            {bed.maintenanceStartTime ? new Date(bed.maintenanceStartTime).toLocaleString() : '-'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-xs font-medium text-gray-500">Ward:</span>
-                          <span className="text-xs font-semibold">
-                            {bed.wardType === 'icu' ? 'ICU' : 'General Ward'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="px-4 py-2 text-xs font-medium text-center text-white bg-yellow-500">
-                    Under Maintenance
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        </section>
       </div>
     </div>
   );
