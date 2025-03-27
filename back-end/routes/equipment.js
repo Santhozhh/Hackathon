@@ -33,15 +33,26 @@ router.get("/", auth, async (req, res) => {
 // Add new equipment (for equipment manager)
 router.post("/", auth, checkRole(["equipmentManager", "bedManager"]), async (req, res) => {
   try {
-    const { name, type } = req.body;
+    const { name, type, serialNumber } = req.body;
     
     if (!name || !type) {
       return res.status(400).json({ message: "Please provide equipment name and type" });
     }
     
+    // Check if equipment with same serial number already exists
+    if (serialNumber) {
+      const existingEquipment = await Equipment.findOne({ serialNumber });
+      if (existingEquipment) {
+        return res.status(400).json({ 
+          message: `Equipment with serial number ${serialNumber} already exists` 
+        });
+      }
+    }
+    
     const newEquipment = new Equipment({
       name,
       type,
+      serialNumber, // Will use the default generator if not provided
       isInUse: false
     });
     
@@ -52,8 +63,16 @@ router.post("/", auth, checkRole(["equipmentManager", "bedManager"]), async (req
       equipment: newEquipment
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error adding equipment:", error);
+    
+    // Handle MongoDB duplicate key error specifically
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        message: "Duplicate equipment serial number. Please use a unique serial number."
+      });
+    }
+    
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

@@ -9,7 +9,11 @@ import equipmentRoutes from "./routes/equipment.js"
 const app = express()
 
 // Middleware
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173', // Or use '*' for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-User-Role']
+}))
 app.use(express.json())
 
 // Database connection

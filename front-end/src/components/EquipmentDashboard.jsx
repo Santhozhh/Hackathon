@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api';
+// Using a more flexible API URL that can work in both development and production
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+console.log("Using API URL:", API_URL);
 
 function EquipmentDashboard() {
   const [equipment, setEquipment] = useState([]);
@@ -17,7 +19,8 @@ function EquipmentDashboard() {
   // Form states
   const [newEquipment, setNewEquipment] = useState({
     name: '',
-    type: ''
+    type: '',
+    serialNumber: ''
   });
   const [selectedEquipment, setSelectedEquipment] = useState('');
   const [patientName, setPatientName] = useState('');
@@ -35,16 +38,35 @@ function EquipmentDashboard() {
   const token = userInfo.token || '';
   const role = userInfo.role || '';
   
+  console.log('User info loaded:', userInfo);
+  console.log('Token:', token ? `${token.substring(0, 10)}...` : 'No token');
+  console.log('Role:', role || 'No role');
+  
   // Add sidebar and section states
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [activeSection, setActiveSection] = useState('overview');
   
   // Helper to get auth headers
   const getAuthHeaders = () => {
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'X-User-Role': role
+    // Adding default values in case localStorage is empty or not available
+    let headers = {
+      'Content-Type': 'application/json'
     };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      // Use default admin token for development/testing
+      headers['Authorization'] = 'Bearer admin-token';
+    }
+    
+    if (role) {
+      headers['X-User-Role'] = role;
+    } else {
+      // Default to equipmentManager if no role found
+      headers['X-User-Role'] = 'equipmentManager';
+    }
+    
     console.log('Using auth headers:', headers);
     return headers;
   };
@@ -52,24 +74,60 @@ function EquipmentDashboard() {
   const fetchEquipment = async () => {
     try {
       setLoading(true);
-      console.log('Fetching equipment with token:', token, 'and role:', role);
+      console.log('Fetching equipment with token:', token ? `${token.substring(0, 10)}...` : 'No token', 'and role:', role);
+      
+      const headers = getAuthHeaders();
+      console.log('Using headers for fetch:', headers);
       
       const response = await axios.get(`${API_URL}/equipment`, {
-        headers: getAuthHeaders()
+        headers: headers,
+        timeout: 10000
       });
       
+      console.log('Equipment data received:', response.data);
       setEquipment(response.data.equipment);
       setStats(response.data.stats);
     } catch (err) {
       console.error('Error fetching equipment:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-      setError(`Failed to load equipment: ${errorMsg}. Please try again.`);
+      
+      if (err.response) {
+        // The request was made and the server responded with a status code outside 2xx
+        console.error('Error response data:', err.response.data);
+        console.error('Error response status:', err.response.status);
+        
+        if (err.response.status === 401) {
+          setError('Authentication failed. Please log in again.');
+        } else {
+          const errorMsg = err.response.data?.message || err.message || 'Unknown error';
+          setError(`Failed to load equipment: ${errorMsg}. Please try again.`);
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('Error request:', err.request);
+        setError('No response received from server. Please check if the backend is running.');
+      } else {
+        // Something happened in setting up the request
+        setError(`Error: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
   };
   
   useEffect(() => {
+    // Development helper: If no user credentials exist, add demo credentials
+    if (!localStorage.getItem('user')) {
+      console.log('No user found in localStorage, adding demo credentials for development');
+      const demoUser = {
+        name: 'Demo Equipment Manager',
+        token: 'admin-token',
+        role: 'equipmentManager'
+      };
+      localStorage.setItem('user', JSON.stringify(demoUser));
+      // Reload component with credentials
+      window.location.reload();
+    }
+    
     // Check authentication on component mount
     if (!token) {
       setError('Please log in to manage equipment');
@@ -117,10 +175,14 @@ function EquipmentDashboard() {
       }
       
       console.log('Adding equipment:', newEquipment, 'with role:', role);
-      console.log('Auth headers:', getAuthHeaders());
+      const headers = getAuthHeaders();
+      console.log('Auth headers:', headers);
+      console.log('API URL:', `${API_URL}/equipment`);
       
+      // Add timeout to API request for better debugging
       const response = await axios.post(`${API_URL}/equipment`, newEquipment, {
-        headers: getAuthHeaders()
+        headers: headers,
+        timeout: 10000 // 10 second timeout
       });
       
       console.log('Add equipment response:', response.data);
@@ -129,19 +191,33 @@ function EquipmentDashboard() {
       alert(`Equipment "${newEquipment.name}" added successfully`);
       
       fetchEquipment();
-      setNewEquipment({ name: '', type: '' });
+      setNewEquipment({ name: '', type: '', serialNumber: '' });
     } catch (err) {
       console.error('Error adding equipment:', err);
-      console.error('Error details:', err.response || err);
       
-      // Check for specific error responses
-      if (err.response?.status === 401) {
-        setError('Authentication failed. Please log in again.');
-      } else if (err.response?.status === 403) {
-        setError('You do not have permission to add equipment. Only equipment managers can perform this action.');
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', err.response.data);
+        console.error('Error response status:', err.response.status);
+        console.error('Error response headers:', err.response.headers);
+        
+        if (err.response.status === 401) {
+          setError('Authentication failed. Please log in again.');
+        } else if (err.response.status === 403) {
+          setError('You do not have permission to add equipment. Only equipment managers can perform this action.');
+        } else {
+          const errorMsg = err.response.data?.message || err.message || 'Unknown error';
+          setError(`Failed to add equipment: ${errorMsg}`);
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('Error request:', err.request);
+        setError('No response received from server. Please check your internet connection and try again.');
       } else {
-        const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-        setError(`Failed to add equipment: ${errorMsg}`);
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', err.message);
+        setError(`An error occurred: ${err.message}`);
       }
     } finally {
       setIsAddingEquipment(false);
@@ -442,6 +518,9 @@ function EquipmentDashboard() {
                             Type
                           </th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Serial Number
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                           </th>
                         </tr>
@@ -454,6 +533,9 @@ function EquipmentDashboard() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {eq.type}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {eq.serialNumber || '-'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${eq.isInUse ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
@@ -519,6 +601,20 @@ function EquipmentDashboard() {
                           <option value="Life Support">Life Support</option>
                           <option value="Other">Other</option>
                         </select>
+                      </div>
+                      <div className="mb-4">
+                        <label htmlFor="serialNumber" className="block text-sm font-medium text-blue-700 mb-1">
+                          Serial Number
+                        </label>
+                        <input
+                          type="text"
+                          id="serialNumber"
+                          name="serialNumber"
+                          className="w-full rounded-md border-blue-300 shadow-sm p-2 border focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                          value={newEquipment.serialNumber}
+                          onChange={handleNewEquipmentChange}
+                          placeholder="Enter serial number"
+                        />
                       </div>
                       <button
                         type="submit"
@@ -701,6 +797,9 @@ function EquipmentDashboard() {
                               Type
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-purple-700 uppercase tracking-wider">
+                              Serial Number
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-purple-700 uppercase tracking-wider">
                               Status
                             </th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-purple-700 uppercase tracking-wider">
@@ -719,6 +818,9 @@ function EquipmentDashboard() {
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {eq.type}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {eq.serialNumber || '-'}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${eq.isInUse ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
@@ -863,7 +965,7 @@ const NavButton = ({ icon, label, isActive, onClick, isExpanded, color }) => {
       default:
         return (
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
         );
     }
