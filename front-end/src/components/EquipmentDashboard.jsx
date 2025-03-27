@@ -30,20 +30,32 @@ function EquipmentDashboard() {
   const [isReturningEquipment, setIsReturningEquipment] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
-  const token = JSON.parse(localStorage.getItem('user'))?.token;
+  // Get user info from localStorage
+  const userInfo = JSON.parse(localStorage.getItem('user')) || {};
+  const token = userInfo.token || '';
+  const role = userInfo.role || 'equipmentManager';
+  
+  // Helper to get auth headers
+  const getAuthHeaders = () => ({
+    'Authorization': `Bearer ${token}`,
+    'X-User-Role': role
+  });
   
   const fetchEquipment = async () => {
     try {
       setLoading(true);
+      console.log('Fetching equipment with token:', token, 'and role:', role);
+      
       const response = await axios.get(`${API_URL}/equipment`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       
       setEquipment(response.data.equipment);
       setStats(response.data.stats);
     } catch (err) {
       console.error('Error fetching equipment:', err);
-      setError('Failed to load equipment. Please try again.');
+      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+      setError(`Failed to load equipment: ${errorMsg}. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -67,14 +79,15 @@ function EquipmentDashboard() {
     try {
       setIsAddingEquipment(true);
       await axios.post(`${API_URL}/equipment`, newEquipment, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       
       fetchEquipment();
       setNewEquipment({ name: '', type: '' });
     } catch (err) {
       console.error('Error adding equipment:', err);
-      setError(err.response?.data?.message || 'Failed to add equipment. Please try again.');
+      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+      setError(`Failed to add equipment: ${errorMsg}. Please check your permissions.`);
     } finally {
       setIsAddingEquipment(false);
     }
@@ -94,7 +107,7 @@ function EquipmentDashboard() {
         equipmentId: selectedEquipment,
         patientName
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       
       fetchEquipment();
@@ -102,7 +115,8 @@ function EquipmentDashboard() {
       setPatientName('');
     } catch (err) {
       console.error('Error assigning equipment:', err);
-      setError(err.response?.data?.message || 'Failed to assign equipment. Please try again.');
+      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+      setError(`Failed to assign equipment: ${errorMsg}. Please try again.`);
     } finally {
       setIsAssigningEquipment(false);
     }
@@ -112,7 +126,7 @@ function EquipmentDashboard() {
     try {
       setIsReturningEquipment(true);
       await axios.post(`${API_URL}/equipment/return`, { equipmentId }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       
       fetchEquipment();
@@ -123,7 +137,8 @@ function EquipmentDashboard() {
       }
     } catch (err) {
       console.error('Error returning equipment:', err);
-      setError(err.response?.data?.message || 'Failed to return equipment. Please try again.');
+      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+      setError(`Failed to return equipment: ${errorMsg}. Please try again.`);
     } finally {
       setIsReturningEquipment(false);
     }
@@ -140,13 +155,14 @@ function EquipmentDashboard() {
     try {
       setIsSearching(true);
       const response = await axios.get(`${API_URL}/equipment/by-patient/${searchPatient}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: getAuthHeaders()
       });
       
       setPatientEquipment(response.data.equipment);
     } catch (err) {
       console.error('Error searching patient equipment:', err);
-      setError(err.response?.data?.message || 'Failed to search patient equipment. Please try again.');
+      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+      setError(`Failed to search patient equipment: ${errorMsg}. Please try again.`);
     } finally {
       setIsSearching(false);
     }

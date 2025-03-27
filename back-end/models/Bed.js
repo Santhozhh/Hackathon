@@ -18,10 +18,16 @@ const bedSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  isUnderMaintenance: {
+    type: Boolean,
+    default: false,
   },
+  maintenanceStartTime: {
+    type: Date,
+    default: null,
+  },
+}, {
+  timestamps: true,
 });
 
 const Bed = mongoose.model('Bed', bedSchema);

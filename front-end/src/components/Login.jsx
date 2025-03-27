@@ -29,21 +29,32 @@ function Login({ onLogin }) {
     try {
       // Check if using default admin credentials
       if (formData.username === 'admin' && formData.password === 'admin') {
-        // Use selected role from form
-        onLogin({ 
+        // Store role with admin login
+        const userData = { 
           username: 'admin', 
           role: formData.role,
           token: 'admin-token'
-        });
+        };
+        
+        console.log('Admin login successful with role:', formData.role);
+        localStorage.setItem('user', JSON.stringify(userData));
+        onLogin(userData);
         return;
       }
       
       // Regular login - sending role with the request
       const response = await axios.post(`${API_URL}/auth/login`, formData);
-      onLogin({
+      
+      // Make sure role is included in user data
+      const userData = {
         ...response.data.user,
-        role: formData.role // Make sure role is included
-      });
+        token: response.data.token,
+        role: response.data.user.role || formData.role
+      };
+      
+      console.log('Regular login successful:', userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      onLogin(userData);
     } catch (err) {
       console.error('Login error:', err);
       setError(err.response?.data?.message || 'Login failed. Please try again.');

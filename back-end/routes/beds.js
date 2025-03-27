@@ -1,135 +1,60 @@
-import express from "express";
-import Bed from "../models/Bed.js";
-import { auth, checkRole } from "../middleware/auth.js";
-
-const router = express.Router();
-
-// Get all beds (with optional filter)
-router.get("/", auth, async (req, res) => {
+// Remove a bed (for bed manager)
+router.delete("/:bedNumber", auth, checkRole("bedManager"), async (req, res) => {
   try {
-    const beds = await Bed.find({});
+    const { bedNumber } = req.params;
     
-    // Calculate stats
-    const totalBeds = beds.length;
-    const occupiedBeds = beds.filter(bed => bed.isOccupied).length;
-    const availableBeds = totalBeds - occupiedBeds;
-    const occupancyRate = totalBeds > 0 ? (occupiedBeds / totalBeds) * 100 : 0;
+    console.log("Delete bed request received for bed number:", bedNumber);
+    console.log("User role:", req.user.role);
     
-    res.json({
-      beds,
-      stats: {
-        totalBeds,
-        occupiedBeds,
-        availableBeds,
-        occupancyRate: Math.round(occupancyRate)
-      }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Add new beds (for bed manager)
-router.post("/", auth, checkRole("bedManager"), async (req, res) => {
-  try {
-    const { count } = req.body;
-    
-    if (!count || count <= 0) {
-      return res.status(400).json({ message: "Please provide a valid bed count" });
+    // Validate bed number
+    if (!bedNumber) {
+      console.log("Bed number not provided");
+      return res.status(400).json({ message: "Please provide a bed number" });
     }
     
-    // Find the highest bed number
-    const highestBed = await Bed.findOne().sort({ bedNumber: -1 });
-    let startNumber = highestBed ? highestBed.bedNumber + 1 : 1;
+    // Convert to number to ensure proper comparison
+    const bedNumberInt = parseInt(bedNumber);
+    if (isNaN(bedNumberInt)) {
+      console.log("Invalid bed number format:", bedNumber);
+      return res.status(400).json({ message: "Bed number must be a valid number" });
+    }
     
-    const newBeds = [];
+    // Find the bed
+    const bed = await Bed.findOne({ bedNumber: bedNumberInt });
     
-    // Create the specified number of beds
-    for (let i = 0; i < count; i++) {
-      newBeds.push({
-        bedNumber: startNumber + i,
-        isOccupied: false
+    if (!bed) {
+      console.log("Bed not found with number:", bedNumberInt);
+      return res.status(404).json({ message: "Bed not found" });
+    }
+    
+    console.log("Bed found:", bed);
+    
+    // Check if bed is occupied
+    if (bed.isOccupied) {
+      console.log("Cannot remove occupied bed:", bedNumberInt);
+      return res.status(400).json({ 
+        message: "Cannot remove an occupied bed. Please discharge the patient first." 
       });
     }
     
-    await Bed.insertMany(newBeds);
-    
-    res.status(201).json({ 
-      message: `${count} new beds added successfully`,
-      firstBedNumber: startNumber,
-      lastBedNumber: startNumber + count - 1
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// Allocate a bed to a patient (for bed manager)
-router.post("/allocate", auth, checkRole("bedManager"), async (req, res) => {
-  try {
-    const { patientName } = req.body;
-    
-    if (!patientName) {
-      return res.status(400).json({ message: "Please provide a patient name" });
+    // Check if bed is under maintenance
+    if (bed.isUnderMaintenance) {
+      console.log("Cannot remove bed under maintenance:", bedNumberInt);
+      return res.status(400).json({ 
+        message: "Cannot remove a bed under maintenance. Please return it from maintenance first." 
+      });
     }
     
-    // Find first available bed
-    const availableBed = await Bed.findOne({ isOccupied: false });
-    
-    if (!availableBed) {
-      return res.status(400).json({ message: "No beds available" });
-    }
-    
-    // Update bed status
-    availableBed.isOccupied = true;
-    availableBed.patientName = patientName;
-    availableBed.allocatedAt = new Date();
-    
-    await availableBed.save();
+    // Delete the bed
+    const result = await Bed.deleteOne({ _id: bed._id });
+    console.log("Delete result:", result);
     
     res.json({
-      message: `Bed ${availableBed.bedNumber} allocated to ${patientName}`,
-      bed: availableBed
+      message: `Bed ${bedNumber} has been removed from the system`,
+      removedBed: bed
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error removing bed:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
-
-// Discharge a patient from a bed (for bed manager)
-router.post("/discharge", auth, checkRole("bedManager"), async (req, res) => {
-  try {
-    const { patientName } = req.body;
-    
-    if (!patientName) {
-      return res.status(400).json({ message: "Please provide a patient name" });
-    }
-    
-    // Find the bed with this patient
-    const bed = await Bed.findOne({ patientName, isOccupied: true });
-    
-    if (!bed) {
-      return res.status(404).json({ message: "No allocated bed found for this patient" });
-    }
-    
-    // Update bed status
-    bed.isOccupied = false;
-    bed.patientName = null;
-    bed.allocatedAt = null;
-    
-    await bed.save();
-    
-    res.json({
-      message: `Patient ${patientName} discharged from bed ${bed.bedNumber}`,
-      bed
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-export default router; 
