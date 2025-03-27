@@ -27,6 +27,7 @@ function BedDashboard() {
   const [bedToMaintain, setBedToMaintain] = useState('');
   const [bedToReturn, setBedToReturn] = useState('');
   const [bedToRemove, setBedToRemove] = useState('');
+  const [bedsToRemoveCount, setBedsToRemoveCount] = useState(1);
   
   // Action states
   const [isAddingBeds, setIsAddingBeds] = useState(false);
@@ -35,6 +36,7 @@ function BedDashboard() {
   const [isMaintenanceBed, setIsMaintenanceBed] = useState(false);
   const [isReturningBed, setIsReturningBed] = useState(false);
   const [isRemovingBed, setIsRemovingBed] = useState(false);
+  const [isRemovingMultipleBeds, setIsRemovingMultipleBeds] = useState(false);
 
   // Get user info from localStorage
   const userInfo = JSON.parse(localStorage.getItem('user')) || {};
@@ -143,6 +145,8 @@ function BedDashboard() {
     
     try {
       setIsRemovingBed(true);
+      setError(''); // Clear previous errors
+      
       console.log('Removing bed with number:', bedToRemove, 'and role:', role);
       
       // Make sure bedNumber is properly formatted
@@ -151,6 +155,31 @@ function BedDashboard() {
         setIsRemovingBed(false);
         return;
       }
+      
+      // Check if bed exists
+      const bedExists = beds.some(bed => bed.bedNumber === parseInt(bedToRemove));
+      if (!bedExists) {
+        setError(`Bed ${bedToRemove} does not exist in the system`);
+        setIsRemovingBed(false);
+        return;
+      }
+      
+      // Check if bed is occupied or in maintenance
+      const targetBed = beds.find(bed => bed.bedNumber === parseInt(bedToRemove));
+      if (targetBed && targetBed.isOccupied) {
+        setError(`Cannot remove bed ${bedToRemove} because it is currently occupied. Please discharge the patient first.`);
+        setIsRemovingBed(false);
+        return;
+      }
+      
+      if (targetBed && targetBed.isUnderMaintenance) {
+        setError(`Cannot remove bed ${bedToRemove} because it is under maintenance. Please return it from maintenance first.`);
+        setIsRemovingBed(false);
+        return;
+      }
+      
+      console.log('Sending DELETE request for bed:', bedToRemove);
+      console.log('Auth headers:', getAuthHeaders());
       
       const response = await axios.delete(`${API_URL}/beds/${bedToRemove}`, {
         headers: getAuthHeaders()
@@ -168,10 +197,99 @@ function BedDashboard() {
       console.error('Error removing bed:', err);
       console.error('Error details:', err.response || err);
       
-      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-      setError(`Failed to remove bed: ${errorMsg}. Please check if the bed is available.`);
+      // Check for specific error responses
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to remove beds. Only bed managers can perform this action.');
+      } else {
+        const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+        setError(`Failed to remove bed: ${errorMsg}`);
+      }
     } finally {
       setIsRemovingBed(false);
+    }
+  };
+  
+  const handleRemoveMultipleBeds = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setIsRemovingMultipleBeds(true);
+      setError(''); // Clear previous errors
+      
+      console.log('Removing multiple beds count:', bedsToRemoveCount, 'and role:', role);
+      
+      // Make sure count is properly formatted
+      if (!bedsToRemoveCount || isNaN(parseInt(bedsToRemoveCount)) || parseInt(bedsToRemoveCount) <= 0) {
+        setError("Please enter a valid number of beds to remove");
+        setIsRemovingMultipleBeds(false);
+        return;
+      }
+      
+      if (parseInt(bedsToRemoveCount) > beds.length) {
+        setError(`Cannot remove ${bedsToRemoveCount} beds. Only ${beds.length} beds exist in the system.`);
+        setIsRemovingMultipleBeds(false);
+        return;
+      }
+      
+      // Sort beds by descending bed number to remove highest numbers first
+      const sortedBeds = [...beds].sort((a, b) => b.bedNumber - a.bedNumber);
+      
+      // Take the first N beds from sorted list
+      const bedsToRemove = sortedBeds.slice(0, parseInt(bedsToRemoveCount));
+      
+      // Check if any beds are occupied or in maintenance
+      const occupiedBeds = bedsToRemove.filter(bed => bed.isOccupied);
+      const maintenanceBeds = bedsToRemove.filter(bed => bed.isUnderMaintenance);
+      
+      if (occupiedBeds.length > 0) {
+        setError(`Cannot remove beds because ${occupiedBeds.length} bed(s) are currently occupied. Please discharge patients first.`);
+        setIsRemovingMultipleBeds(false);
+        return;
+      }
+      
+      if (maintenanceBeds.length > 0) {
+        setError(`Cannot remove beds because ${maintenanceBeds.length} bed(s) are under maintenance. Please return them from maintenance first.`);
+        setIsRemovingMultipleBeds(false);
+        return;
+      }
+      
+      // Remove beds one by one
+      let removedCount = 0;
+      for (const bed of bedsToRemove) {
+        console.log('Removing bed:', bed.bedNumber);
+        try {
+          const response = await axios.delete(`${API_URL}/beds/${bed.bedNumber}`, {
+            headers: getAuthHeaders()
+          });
+          console.log('Remove bed response:', response.data);
+          removedCount++;
+        } catch (err) {
+          console.error(`Error removing bed ${bed.bedNumber}:`, err);
+        }
+      }
+      
+      // Show success message
+      alert(`Successfully removed ${removedCount} beds from the system`);
+      
+      fetchBeds();
+      setBedsToRemoveCount(1);
+    } catch (err) {
+      console.error('Error removing multiple beds:', err);
+      console.error('Error details:', err.response || err);
+      
+      // Check for specific error responses
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to remove beds. Only bed managers can perform this action.');
+      } else {
+        const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+        setError(`Failed to remove beds: ${errorMsg}`);
+      }
+    } finally {
+      setIsRemovingMultipleBeds(false);
     }
   };
   
@@ -226,16 +344,66 @@ function BedDashboard() {
     
     try {
       setIsMaintenanceBed(true);
-      await axios.post(`${API_URL}/beds/maintenance`, { bedNumber: bedToMaintain }, {
+      setError(''); // Clear previous errors
+      
+      console.log('Setting bed to maintenance with number:', bedToMaintain, 'and role:', role);
+      
+      // Make sure bedNumber is properly formatted
+      if (!bedToMaintain || isNaN(parseInt(bedToMaintain))) {
+        setError("Please enter a valid bed number");
+        setIsMaintenanceBed(false);
+        return;
+      }
+      
+      // Check if bed exists
+      const bedExists = beds.some(bed => bed.bedNumber === parseInt(bedToMaintain));
+      if (!bedExists) {
+        setError(`Bed ${bedToMaintain} does not exist in the system`);
+        setIsMaintenanceBed(false);
+        return;
+      }
+      
+      // Check if bed is already under maintenance
+      const targetBed = beds.find(bed => bed.bedNumber === parseInt(bedToMaintain));
+      if (targetBed && targetBed.isUnderMaintenance) {
+        setError(`Bed ${bedToMaintain} is already under maintenance`);
+        setIsMaintenanceBed(false);
+        return;
+      }
+      
+      // Check if bed is occupied
+      if (targetBed && targetBed.isOccupied) {
+        setError(`Cannot set bed ${bedToMaintain} for maintenance because it is currently occupied. Please discharge the patient first.`);
+        setIsMaintenanceBed(false);
+        return;
+      }
+      
+      console.log('Sending maintenance request for bed:', bedToMaintain);
+      console.log('Auth headers:', getAuthHeaders());
+      
+      const response = await axios.post(`${API_URL}/beds/maintenance`, { 
+        bedNumber: parseInt(bedToMaintain) 
+      }, {
         headers: getAuthHeaders()
       });
+      
+      console.log('Maintenance response:', response.data);
       
       fetchBeds();
       setBedToMaintain('');
     } catch (err) {
       console.error('Error setting bed to maintenance:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-      setError(`Failed to set bed for maintenance: ${errorMsg}. Please try again.`);
+      console.error('Error details:', err.response || err);
+      
+      // Check for specific error responses
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to set beds for maintenance. Only bed managers can perform this action.');
+      } else {
+        const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+        setError(`Failed to set bed for maintenance: ${errorMsg}`);
+      }
     } finally {
       setIsMaintenanceBed(false);
     }
@@ -246,16 +414,59 @@ function BedDashboard() {
     
     try {
       setIsReturningBed(true);
-      await axios.post(`${API_URL}/beds/return-from-maintenance`, { bedNumber: bedToReturn }, {
+      setError(''); // Clear previous errors
+      
+      console.log('Returning bed from maintenance with number:', bedToReturn, 'and role:', role);
+      
+      // Make sure bedNumber is properly formatted
+      if (!bedToReturn || isNaN(parseInt(bedToReturn))) {
+        setError("Please enter a valid bed number");
+        setIsReturningBed(false);
+        return;
+      }
+      
+      // Check if bed exists
+      const bedExists = beds.some(bed => bed.bedNumber === parseInt(bedToReturn));
+      if (!bedExists) {
+        setError(`Bed ${bedToReturn} does not exist in the system`);
+        setIsReturningBed(false);
+        return;
+      }
+      
+      // Check if bed is actually under maintenance
+      const targetBed = beds.find(bed => bed.bedNumber === parseInt(bedToReturn));
+      if (targetBed && !targetBed.isUnderMaintenance) {
+        setError(`Bed ${bedToReturn} is not currently under maintenance`);
+        setIsReturningBed(false);
+        return;
+      }
+      
+      console.log('Sending return from maintenance request for bed:', bedToReturn);
+      console.log('Auth headers:', getAuthHeaders());
+      
+      const response = await axios.post(`${API_URL}/beds/return-from-maintenance`, { 
+        bedNumber: parseInt(bedToReturn) 
+      }, {
         headers: getAuthHeaders()
       });
+      
+      console.log('Return from maintenance response:', response.data);
       
       fetchBeds();
       setBedToReturn('');
     } catch (err) {
       console.error('Error returning bed from maintenance:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-      setError(`Failed to return bed from maintenance: ${errorMsg}. Please try again.`);
+      console.error('Error details:', err.response || err);
+      
+      // Check for specific error responses
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to return beds from maintenance. Only bed managers can perform this action.');
+      } else {
+        const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+        setError(`Failed to return bed from maintenance: ${errorMsg}`);
+      }
     } finally {
       setIsReturningBed(false);
     }
@@ -378,32 +589,70 @@ function BedDashboard() {
           </form>
         </div>
         
-        {/* Remove Bed Form */}
+        {/* Remove Beds Section */}
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Remove Beds</h3>
-          <form onSubmit={handleRemoveBed}>
-            <div className="mb-4">
-              <label htmlFor="bedToRemove" className="block text-sm font-medium text-gray-700 mb-1">
-                Bed Number to Remove
-              </label>
-              <input
-                type="number"
-                id="bedToRemove"
-                min="1"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
-                value={bedToRemove}
-                onChange={(e) => setBedToRemove(e.target.value)}
-                required
-              />
+          <div className="space-y-4">
+            {/* Remove Single Bed Form */}
+            <form onSubmit={handleRemoveBed}>
+              <div className="mb-4">
+                <label htmlFor="bedToRemove" className="block text-sm font-medium text-gray-700 mb-1">
+                  Bed Number to Remove
+                </label>
+                <input
+                  type="number"
+                  id="bedToRemove"
+                  min="1"
+                  className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                  value={bedToRemove}
+                  onChange={(e) => setBedToRemove(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isRemovingBed}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-red-400"
+              >
+                {isRemovingBed ? 'Removing...' : 'Remove Bed'}
+              </button>
+            </form>
+            
+            {/* Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">OR</span>
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={isRemovingBed}
-              className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-red-400"
-            >
-              {isRemovingBed ? 'Removing...' : 'Remove Bed'}
-            </button>
-          </form>
+            
+            {/* Remove Multiple Beds Form */}
+            <form onSubmit={handleRemoveMultipleBeds}>
+              <div className="mb-4">
+                <label htmlFor="bedsToRemoveCount" className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Highest Numbered Beds to Remove
+                </label>
+                <input
+                  type="number"
+                  id="bedsToRemoveCount"
+                  min="1"
+                  className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                  value={bedsToRemoveCount}
+                  onChange={(e) => setBedsToRemoveCount(parseInt(e.target.value))}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isRemovingMultipleBeds}
+                className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 disabled:bg-red-400"
+              >
+                {isRemovingMultipleBeds ? 'Removing...' : `Remove ${bedsToRemoveCount} Highest-Numbered Beds`}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
       
