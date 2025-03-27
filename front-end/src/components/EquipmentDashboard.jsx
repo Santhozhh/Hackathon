@@ -33,13 +33,17 @@ function EquipmentDashboard() {
   // Get user info from localStorage
   const userInfo = JSON.parse(localStorage.getItem('user')) || {};
   const token = userInfo.token || '';
-  const role = userInfo.role || 'equipmentManager';
+  const role = userInfo.role || '';
   
   // Helper to get auth headers
-  const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${token}`,
-    'X-User-Role': role
-  });
+  const getAuthHeaders = () => {
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'X-User-Role': role
+    };
+    console.log('Using auth headers:', headers);
+    return headers;
+  };
   
   const fetchEquipment = async () => {
     try {
@@ -62,6 +66,21 @@ function EquipmentDashboard() {
   };
   
   useEffect(() => {
+    // Check authentication on component mount
+    if (!token) {
+      setError('Please log in to manage equipment');
+      return;
+    }
+    if (!role) {
+      setError('User role not found. Please log in again');
+      return;
+    }
+    // Allow both equipmentManager and bedManager roles
+    if (role !== 'equipmentManager' && role !== 'bedManager') {
+      setError('You need equipment manager or bed manager permissions to add or manage equipment');
+      return;
+    }
+    
     fetchEquipment();
   }, []);
   
@@ -78,16 +97,48 @@ function EquipmentDashboard() {
     
     try {
       setIsAddingEquipment(true);
-      await axios.post(`${API_URL}/equipment`, newEquipment, {
+      setError(''); // Clear previous errors
+      
+      // Validate input
+      if (!newEquipment.name.trim()) {
+        setError('Equipment name is required');
+        setIsAddingEquipment(false);
+        return;
+      }
+      
+      if (!newEquipment.type.trim()) {
+        setError('Equipment type is required');
+        setIsAddingEquipment(false);
+        return;
+      }
+      
+      console.log('Adding equipment:', newEquipment, 'with role:', role);
+      console.log('Auth headers:', getAuthHeaders());
+      
+      const response = await axios.post(`${API_URL}/equipment`, newEquipment, {
         headers: getAuthHeaders()
       });
+      
+      console.log('Add equipment response:', response.data);
+      
+      // Show success alert
+      alert(`Equipment "${newEquipment.name}" added successfully`);
       
       fetchEquipment();
       setNewEquipment({ name: '', type: '' });
     } catch (err) {
       console.error('Error adding equipment:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
-      setError(`Failed to add equipment: ${errorMsg}. Please check your permissions.`);
+      console.error('Error details:', err.response || err);
+      
+      // Check for specific error responses
+      if (err.response?.status === 401) {
+        setError('Authentication failed. Please log in again.');
+      } else if (err.response?.status === 403) {
+        setError('You do not have permission to add equipment. Only equipment managers can perform this action.');
+      } else {
+        const errorMsg = err.response?.data?.message || err.message || 'Unknown error';
+        setError(`Failed to add equipment: ${errorMsg}`);
+      }
     } finally {
       setIsAddingEquipment(false);
     }
@@ -190,65 +241,85 @@ function EquipmentDashboard() {
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Total Equipment</h3>
-          <p className="mt-2 text-3xl font-bold">{stats.totalEquipment}</p>
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-indigo-500 transition-transform hover:scale-105">
+          <div className="text-3xl font-bold text-indigo-800 mb-1">{stats.totalEquipment}</div>
+          <div className="text-sm text-indigo-600 font-medium">Total Equipment</div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">In Use</h3>
-          <p className="mt-2 text-3xl font-bold text-red-600">{stats.inUseEquipment}</p>
+        <div className="bg-gradient-to-br from-red-50 to-rose-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-rose-500 transition-transform hover:scale-105">
+          <div className="text-3xl font-bold text-rose-600 mb-1">{stats.inUseEquipment}</div>
+          <div className="text-sm text-rose-700 font-medium">In Use</div>
+          <div className="mt-1 text-xs text-rose-500 font-medium">
+            {stats.usageRate}% Usage Rate
+          </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Available</h3>
-          <p className="mt-2 text-3xl font-bold text-green-600">{stats.availableEquipment}</p>
+        <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-emerald-500 transition-transform hover:scale-105">
+          <div className="text-3xl font-bold text-emerald-600 mb-1">{stats.availableEquipment}</div>
+          <div className="text-sm text-emerald-700 font-medium">Available</div>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900">Usage Rate</h3>
-          <p className="mt-2 text-3xl font-bold">{stats.usageRate}%</p>
+        <div className="bg-gradient-to-br from-cyan-50 to-sky-100 rounded-lg shadow-md p-4 flex flex-col items-center border-b-4 border-sky-500 transition-transform hover:scale-105">
+          <div className="text-3xl font-bold text-sky-600 mb-1">{stats.usageRate}%</div>
+          <div className="text-sm text-sky-700 font-medium">Usage Rate</div>
+          <div className="mt-2 relative pt-1 w-full">
+            <div className="overflow-hidden h-2 mb-1 text-xs flex rounded-full bg-sky-100">
+              <div 
+                style={{ width: `${stats.usageRate}%` }} 
+                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-sky-500 to-blue-600 rounded-full"
+              ></div>
+            </div>
+          </div>
         </div>
       </div>
       
       {/* Action Forms */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Add Equipment Form */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Equipment</h3>
+        <div className="bg-gradient-to-br from-white to-cyan-50 rounded-lg shadow-md p-4 border border-cyan-100">
+          <h3 className="text-md font-medium text-cyan-800 mb-3">Add New Equipment</h3>
           <form onSubmit={handleAddEquipment}>
-            <div className="mb-4">
-              <label htmlFor="equipmentName" className="block text-sm font-medium text-gray-700 mb-1">
-                Equipment Name
+            <div className="mb-3">
+              <label htmlFor="equipmentName" className="block text-sm font-medium text-cyan-700 mb-1">
+                Equipment Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 id="equipmentName"
                 name="name"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                className="w-full rounded-md border-cyan-300 shadow-sm p-2 border focus:border-cyan-500 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
                 value={newEquipment.name}
                 onChange={handleNewEquipmentChange}
                 required
+                placeholder="Enter equipment name (e.g. Ventilator 3000)"
               />
             </div>
-            <div className="mb-4">
-              <label htmlFor="equipmentType" className="block text-sm font-medium text-gray-700 mb-1">
-                Equipment Type
+            <div className="mb-3">
+              <label htmlFor="equipmentType" className="block text-sm font-medium text-cyan-700 mb-1">
+                Equipment Type <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 id="equipmentType"
                 name="type"
-                className="w-full rounded-md border-gray-300 shadow-sm p-2 border"
+                className="w-full rounded-md border-cyan-300 shadow-sm p-2 border focus:border-cyan-500 focus:ring focus:ring-cyan-200 focus:ring-opacity-50"
                 value={newEquipment.type}
                 onChange={handleNewEquipmentChange}
                 required
-              />
+              >
+                <option value="">Select equipment type</option>
+                <option value="Respiratory">Respiratory</option>
+                <option value="Monitoring">Monitoring</option>
+                <option value="Diagnostic">Diagnostic</option>
+                <option value="Therapeutic">Therapeutic</option>
+                <option value="Surgical">Surgical</option>
+                <option value="Life Support">Life Support</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <button
               type="submit"
               disabled={isAddingEquipment}
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:bg-indigo-400"
+              className="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 text-white py-2 px-4 rounded-md hover:from-cyan-700 hover:to-cyan-800 disabled:opacity-70 transition-all duration-200 shadow-md"
             >
               {isAddingEquipment ? 'Adding...' : 'Add Equipment'}
             </button>

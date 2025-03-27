@@ -31,7 +31,7 @@ router.get("/", auth, async (req, res) => {
 });
 
 // Add new equipment (for equipment manager)
-router.post("/", auth, checkRole("equipmentManager"), async (req, res) => {
+router.post("/", auth, checkRole(["equipmentManager", "bedManager"]), async (req, res) => {
   try {
     const { name, type } = req.body;
     
@@ -58,7 +58,7 @@ router.post("/", auth, checkRole("equipmentManager"), async (req, res) => {
 });
 
 // Assign equipment to a patient (for equipment manager)
-router.post("/assign", auth, checkRole("equipmentManager"), async (req, res) => {
+router.post("/assign", auth, checkRole(["equipmentManager", "bedManager"]), async (req, res) => {
   try {
     const { equipmentId, patientName } = req.body;
     
@@ -95,7 +95,7 @@ router.post("/assign", auth, checkRole("equipmentManager"), async (req, res) => 
 });
 
 // Return equipment from a patient (for equipment manager)
-router.post("/return", auth, checkRole("equipmentManager"), async (req, res) => {
+router.post("/return", auth, checkRole(["equipmentManager", "bedManager"]), async (req, res) => {
   try {
     const { equipmentId } = req.body;
     

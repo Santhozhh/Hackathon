@@ -57,30 +57,27 @@ const auth = async (req, res, next) => {
   }
 };
 
-const checkRole = (role) => {
+// Middleware to check if user has required role
+export const checkRole = (requiredRoles) => {
   return (req, res, next) => {
-    try {
-      console.log(`Checking role: required=${role}, user=${req.user?.role}`);
-      
-      if (!req.user) {
-        console.log("No user in request");
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      if (req.user.role !== role) {
-        console.log(`Role mismatch: ${req.user.role} vs ${role}`);
-        return res.status(403).json({ 
-          message: `Access denied. Required role: ${role}` 
-        });
-      }
-      
-      console.log("Role check passed");
-      next();
-    } catch (error) {
-      console.error("Role check error:", error);
-      res.status(500).json({ message: "Server error during role check" });
+    // Convert single role to array for consistent handling
+    const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+    
+    const userRole = req.headers['x-user-role'];
+    
+    if (!userRole) {
+      return res.status(403).json({ message: 'Role information missing' });
     }
+    
+    // Check if user's role matches any of the required roles
+    if (!roles.includes(userRole)) {
+      return res.status(403).json({ 
+        message: `You do not have permission to perform this action. Required roles: ${roles.join(', ')}` 
+      });
+    }
+    
+    next();
   };
 };
 
-export { auth, checkRole }; 
+export { auth }; 
