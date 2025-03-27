@@ -233,24 +233,34 @@ function EquipmentDashboard() {
       <div 
         className={`${
           isSidebarExpanded ? 'w-64' : 'w-20'
-        } bg-white shadow-lg transition-all duration-300 ease-in-out relative`}
+        } bg-white shadow-lg transition-all duration-300 ease-in-out relative h-full flex flex-col`}
       >
         {/* Toggle Button */}
         <button
           onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-          className="absolute -right-3 top-8 bg-white rounded-full p-1 shadow-md hover:shadow-lg transition-shadow"
+          className="absolute -right-3 top-20 bg-white rounded-full p-1.5 shadow-md hover:shadow-lg transition-shadow border border-gray-200 z-10"
         >
-          <span className="material-icons text-gray-600 text-xl">
-            {isSidebarExpanded ? 'chevron_left' : 'chevron_right'}
-          </span>
+          {isSidebarExpanded ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          )}
         </button>
 
         {/* Logo Section */}
-        <div className="p-4 border-b bg-gradient-to-r from-cyan-600 to-blue-500">
+        <div className="p-5 border-b bg-gradient-to-r from-blue-600 to-cyan-600">
           <div className="flex items-center space-x-4">
-            <span className="material-icons text-white text-3xl">inventory_2</span>
+            <div className="bg-white p-2 rounded-lg shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
             {isSidebarExpanded && (
-              <h1 className="text-xl font-bold text-white">Equipment Manager</h1>
+              <h1 className="text-xl font-bold text-white">Equipment</h1>
             )}
           </div>
         </div>
@@ -304,7 +314,9 @@ function EquipmentDashboard() {
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-gray-50">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
-                <span className="material-icons text-white text-sm">person</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -336,7 +348,9 @@ function EquipmentDashboard() {
                 onClick={() => fetchEquipment()}
                 className="flex items-center px-4 py-2 bg-cyan-100 text-cyan-700 rounded-lg hover:bg-cyan-200 transition-colors"
               >
-                <span className="material-icons mr-2 text-sm">refresh</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                </svg>
                 Refresh
               </button>
             </div>
@@ -349,10 +363,14 @@ function EquipmentDashboard() {
                 className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                 onClick={() => setError('')}
               >
-                <span className="material-icons">close</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </button>
               <div className="flex items-center">
-                <span className="material-icons mr-2">error_outline</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
                 {error}
               </div>
             </div>
@@ -610,7 +628,9 @@ function EquipmentDashboard() {
                       disabled={isSearching}
                       className="bg-gradient-to-r from-amber-600 to-amber-700 text-white py-2 px-4 rounded-md hover:from-amber-700 hover:to-amber-800 disabled:opacity-70 transition-all duration-200 shadow-md flex items-center"
                     >
-                      <span className="material-icons mr-2">search</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                      </svg>
                       {isSearching ? 'Searching...' : 'Search'}
                     </button>
                   </form>
@@ -634,7 +654,9 @@ function EquipmentDashboard() {
                                 disabled={isReturningEquipment}
                                 className="bg-red-100 text-red-700 py-1 px-2 rounded-md hover:bg-red-200 text-xs font-medium flex items-center"
                               >
-                                <span className="material-icons text-xs mr-1">keyboard_return</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" transform="rotate(180 10 10)" />
+                                </svg>
                                 Return
                               </button>
                             </div>
@@ -646,7 +668,9 @@ function EquipmentDashboard() {
                   
                   {searchPatient && patientEquipment.length === 0 && !isSearching && (
                     <div className="mt-4 bg-blue-50 text-blue-700 px-4 py-3 rounded-lg flex items-center">
-                      <span className="material-icons mr-2">info</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 011 1v2a1 1 0 11-2 0V7a1 1 0 011-1zm0 6a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+                      </svg>
                       <p>No equipment assigned to this patient.</p>
                     </div>
                   )}
@@ -734,19 +758,115 @@ function EquipmentDashboard() {
 
 // NavButton Component
 const NavButton = ({ icon, label, isActive, onClick, isExpanded, color }) => {
+  // Pre-defined classes for each color to avoid string interpolation issues with Tailwind
   const getColorClasses = () => {
-    const colors = {
-      cyan: 'hover:bg-cyan-50 hover:text-cyan-700',
-      blue: 'hover:bg-blue-50 hover:text-blue-700',
-      green: 'hover:bg-green-50 hover:text-green-700',
-      amber: 'hover:bg-amber-50 hover:text-amber-700',
-      purple: 'hover:bg-purple-50 hover:text-purple-700'
-    };
-    
     if (isActive) {
-      return `bg-${color}-100 text-${color}-700`;
+      if (color === 'cyan') return 'bg-cyan-100 text-cyan-700';
+      if (color === 'blue') return 'bg-blue-100 text-blue-700';
+      if (color === 'green') return 'bg-green-100 text-green-700';
+      if (color === 'amber') return 'bg-amber-100 text-amber-700';
+      if (color === 'purple') return 'bg-purple-100 text-purple-700';
     }
-    return `text-gray-600 ${colors[color]}`;
+    
+    return `text-gray-600 ${
+      color === 'cyan' ? 'hover:bg-cyan-50 hover:text-cyan-700' :
+      color === 'blue' ? 'hover:bg-blue-50 hover:text-blue-700' :
+      color === 'green' ? 'hover:bg-green-50 hover:text-green-700' :
+      color === 'amber' ? 'hover:bg-amber-50 hover:text-amber-700' :
+      'hover:bg-purple-50 hover:text-purple-700'
+    }`;
+  };
+
+  // Map icon names to SVG icons
+  const renderIcon = () => {
+    switch(icon) {
+      case 'dashboard':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+          </svg>
+        );
+      case 'add_circle':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'assignment':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+            <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'person_search':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M5 8a3 3 0 116 0 3 3 0 01-6 0z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'list_alt':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'chevron_left':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'chevron_right':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'inventory_2':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        );
+      case 'search':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'refresh':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'error_outline':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'close':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'person':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+          </svg>
+        );
+      default:
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+          </svg>
+        );
+    }
   };
 
   return (
@@ -755,7 +875,9 @@ const NavButton = ({ icon, label, isActive, onClick, isExpanded, color }) => {
       className={`w-full flex items-center ${isExpanded ? 'px-4' : 'justify-center'} py-3 rounded-lg transition-all duration-200 ${getColorClasses()}`}
       title={!isExpanded ? label : ''}
     >
-      <span className="material-icons text-xl">{icon}</span>
+      <div className="flex-shrink-0">
+        {renderIcon()}
+      </div>
       {isExpanded && <span className="ml-3 font-medium">{label}</span>}
     </button>
   );

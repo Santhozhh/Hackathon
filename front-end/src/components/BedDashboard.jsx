@@ -58,6 +58,9 @@ function BedDashboard() {
   // Add new state for active section
   const [activeSection, setActiveSection] = useState('overview');
   
+  // Add sidebar expanded state
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  
   const fetchBeds = async () => {
     try {
       setLoading(true);
@@ -508,85 +511,125 @@ function BedDashboard() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Side Navigation */}
-      <div className="w-64 bg-white shadow-md">
-        <div className="p-4 border-b">
-          <h1 className="text-xl font-bold text-indigo-800">Bed Manager</h1>
+      <div 
+        className={`${
+          isSidebarExpanded ? 'w-64' : 'w-20'
+        } bg-white shadow-md transition-all duration-300 ease-in-out relative h-full flex flex-col`}
+      >
+        {/* Toggle Button */}
+        <button
+          onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+          className="absolute -right-3 top-20 bg-white rounded-full p-1.5 shadow-md hover:shadow-lg transition-shadow border border-gray-200 z-10"
+        >
+          {isSidebarExpanded ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
+        
+        {/* Logo Section */}
+        <div className="p-5 border-b bg-gradient-to-r from-indigo-600 to-purple-600">
+          <div className="flex items-center space-x-4">
+            <div className="bg-white p-2 rounded-lg shadow-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            {isSidebarExpanded && (
+              <h1 className="text-xl font-bold text-white">Bed Manager</h1>
+            )}
+          </div>
         </div>
         
+        {/* Navigation Menu */}
         <nav className="p-4 space-y-2">
-          <button
+          <NavButton
+            icon="dashboard"
+            label="Overview"
+            isActive={activeSection === 'overview'}
             onClick={() => setActiveSection('overview')}
-            className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${
-              activeSection === 'overview' 
-                ? 'bg-indigo-100 text-indigo-800' 
-                : 'hover:bg-gray-100'
-            }`}
-          >
-            <span className="material-icons mr-3">dashboard</span>
-            Overview
-          </button>
-          
-          <button
+            isExpanded={isSidebarExpanded}
+            color="indigo"
+          />
+          <NavButton
+            icon="add_circle"
+            label="Add/Remove Beds"
+            isActive={activeSection === 'addBeds'}
             onClick={() => setActiveSection('addBeds')}
-            className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${
-              activeSection === 'addBeds' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'hover:bg-gray-100'
-            }`}
-          >
-            <span className="material-icons mr-3">add_circle</span>
-            Add/Remove Beds
-          </button>
-          
-          <button
+            isExpanded={isSidebarExpanded}
+            color="blue"
+          />
+          <NavButton
+            icon="people"
+            label="Patient Management"
+            isActive={activeSection === 'patients'}
             onClick={() => setActiveSection('patients')}
-            className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${
-              activeSection === 'patients' 
-                ? 'bg-green-100 text-green-800' 
-                : 'hover:bg-gray-100'
-            }`}
-          >
-            <span className="material-icons mr-3">people</span>
-            Patient Management
-          </button>
-          
-          <button
+            isExpanded={isSidebarExpanded}
+            color="green"
+          />
+          <NavButton
+            icon="build"
+            label="Maintenance"
+            isActive={activeSection === 'maintenance'}
             onClick={() => setActiveSection('maintenance')}
-            className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${
-              activeSection === 'maintenance' 
-                ? 'bg-amber-100 text-amber-800' 
-                : 'hover:bg-gray-100'
-            }`}
-          >
-            <span className="material-icons mr-3">build</span>
-            Maintenance
-          </button>
-          
-          <button
+            isExpanded={isSidebarExpanded}
+            color="amber"
+          />
+          <NavButton
+            icon="history"
+            label="History"
+            isActive={activeSection === 'history'}
             onClick={() => setActiveSection('history')}
-            className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${
-              activeSection === 'history' 
-                ? 'bg-purple-100 text-purple-800' 
-                : 'hover:bg-gray-100'
-            }`}
-          >
-            <span className="material-icons mr-3">history</span>
-            History
-          </button>
+            isExpanded={isSidebarExpanded}
+            color="purple"
+          />
         </nav>
+        
+        {/* User Info */}
+        {isSidebarExpanded && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t bg-gray-50">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {userInfo.name || 'Bed Manager'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {role}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="p-8">
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 relative">
+              <div className="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
               <button 
-                className="float-right font-bold"
+                className="absolute top-2 right-2 text-red-500 hover:text-red-700"
                 onClick={() => setError('')}
               >
-                &times;
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
           )}
@@ -712,9 +755,12 @@ function BedDashboard() {
                 <h2 className="text-xl font-semibold mb-4 text-indigo-800 border-b pb-2 flex justify-between items-center">
                   <span>All Hospital Beds</span>
                   <button 
-                    className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 font-medium rounded-md hover:bg-indigo-200 transition-colors duration-200"
+                    className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 font-medium rounded-md hover:bg-indigo-200 transition-colors duration-200 flex items-center"
                     onClick={() => fetchBeds()}
                   >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                    </svg>
                     Refresh Beds
                   </button>
                 </h2>
@@ -1062,9 +1108,12 @@ function BedDashboard() {
                   <div className="bg-gradient-to-r from-amber-500 to-yellow-600 p-3 border-b flex justify-between items-center">
                     <h3 className="text-md font-medium text-white">Current Maintenance Beds</h3>
                     <button 
-                      className="px-2 py-1 text-xs bg-white text-amber-700 font-medium rounded-md hover:bg-amber-50 transition-colors duration-200 shadow-sm"
+                      className="px-2 py-1 text-xs bg-white text-amber-700 font-medium rounded-md hover:bg-amber-50 transition-colors duration-200 shadow-sm flex items-center"
                       onClick={() => fetchBeds()}
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                      </svg>
                       Refresh
                     </button>
                   </div>
@@ -1110,21 +1159,31 @@ function BedDashboard() {
                   <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 border-b flex justify-between items-center">
                     <h3 className="text-md font-medium text-white">Recent Allocations</h3>
                     <button 
-                      className="px-2 py-1 text-xs bg-white text-indigo-700 font-medium rounded-md hover:bg-indigo-50 transition-colors duration-200 shadow-sm"
+                      className="px-2 py-1 text-xs bg-white text-indigo-700 font-medium rounded-md hover:bg-indigo-50 transition-colors duration-200 shadow-sm flex items-center"
                       onClick={() => fetchBedHistory()}
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                      </svg>
                       Refresh
                     </button>
                   </div>
                   
                   {historyError && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 m-2 rounded text-xs">
-                      {historyError}
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 m-2 rounded text-xs relative">
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {historyError}
+                      </div>
                       <button 
-                        className="float-right font-bold"
+                        className="absolute top-1 right-1 text-red-500 hover:text-red-700"
                         onClick={() => setHistoryError('')}
                       >
-                        &times;
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
                       </button>
                     </div>
                   )}
@@ -1192,3 +1251,86 @@ function BedDashboard() {
 }
 
 export default BedDashboard; 
+
+// NavButton Component
+const NavButton = ({ icon, label, isActive, onClick, isExpanded, color }) => {
+  // Pre-defined classes for each color to avoid string interpolation issues with Tailwind
+  const getColorClasses = () => {
+    if (isActive) {
+      if (color === 'indigo') return 'bg-indigo-100 text-indigo-700';
+      if (color === 'blue') return 'bg-blue-100 text-blue-700';
+      if (color === 'green') return 'bg-green-100 text-green-700';
+      if (color === 'amber') return 'bg-amber-100 text-amber-700';
+      if (color === 'purple') return 'bg-purple-100 text-purple-700';
+    }
+    
+    return `text-gray-600 ${
+      color === 'indigo' ? 'hover:bg-indigo-50 hover:text-indigo-700' :
+      color === 'blue' ? 'hover:bg-blue-50 hover:text-blue-700' :
+      color === 'green' ? 'hover:bg-green-50 hover:text-green-700' :
+      color === 'amber' ? 'hover:bg-amber-50 hover:text-amber-700' :
+      'hover:bg-purple-50 hover:text-purple-700'
+    }`;
+  };
+
+  // Map icon names to SVG icons
+  const renderIcon = () => {
+    switch(icon) {
+      case 'dashboard':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+          </svg>
+        );
+      case 'add_circle':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'people':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+          </svg>
+        );
+      case 'build':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'history':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+          </svg>
+        );
+      case 'refresh':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+          </svg>
+        );
+      default:
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+          </svg>
+        );
+    }
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center ${isExpanded ? 'px-4' : 'justify-center'} py-3 rounded-lg transition-all duration-200 ${getColorClasses()}`}
+      title={!isExpanded ? label : ''}
+    >
+      <div className="flex-shrink-0">
+        {renderIcon()}
+      </div>
+      {isExpanded && <span className="ml-3 font-medium">{label}</span>}
+    </button>
+  );
+}; 
